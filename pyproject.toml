@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "creduent"
+version = "0.4.0"
+description = "Creduent Protocol SDK - cryptographic identity for AI agents"
+
+authors = [
+    {name = "IDevSec"}
+]
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "Apache-2.0 OR Commercial"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "cryptography",
+    "requests",
+    "jcs",
+]
+
+[project.urls]
+Homepage = "https://github.com/idevsec/creduent"
+Repository = "https://github.com/idevsec/creduent"
+
+[project.scripts]
+creduent-sign = "creduent.sign:main"
+creduent-verify = "creduent.verify:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["creduent*"]

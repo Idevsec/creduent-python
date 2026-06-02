@@ -1,0 +1,88 @@
+CREDUENT PROTOCOL — COMMERCIAL LICENSE AGREEMENT
+Copyright (c) 2026 IDevSec. All Rights Reserved.
+
+This Commercial License Agreement ("Agreement") is between IDevSec
+("Licensor") and the entity or individual purchasing a commercial
+license ("Licensee").
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. DEFINITIONS
+
+   "Software" means the Creduent Protocol source code, SDKs, CLI tools,
+   registry implementation, and all associated documentation.
+
+   "Commercial Use" means any use of the Software in a product or service
+   that is sold, licensed, or otherwise monetized, or used internally
+   within an organization with revenue exceeding USD $1,000,000 annually.
+
+2. GRANT OF LICENSE
+
+   Subject to payment of applicable fees and compliance with this
+   Agreement, Licensor grants Licensee a non-exclusive, non-transferable,
+   worldwide license to:
+
+   (a) Use, copy, and modify the Software for Commercial Use.
+   (b) Distribute the Software as part of Licensee's proprietary product.
+   (c) Create proprietary Derivative Works without open-source obligation.
+   (d) Deploy a private or white-label Creduent Registry.
+   (e) Embed the Software in SaaS or hosted services.
+
+3. RESTRICTIONS
+
+   Licensee may NOT:
+
+   (a) Sublicense, sell, or transfer this license to third parties.
+   (b) Remove or alter copyright notices or attribution to IDevSec.
+   (c) Use the "Creduent" trademark without prior written consent.
+   (d) Use the Software to build a competing open protocol registry
+       that claims to be the "official" Creduent Protocol.
+
+4. ATTRIBUTION
+
+   All products and services using this license must include the
+   following notice in their documentation or About section:
+
+      "Powered by Creduent Protocol — https://creduent.idevsec.com"
+
+5. FEES & PAYMENT
+
+   Commercial license fees are determined based on usage tier:
+
+   - Startup Tier  (revenue $1M–$10M/yr):  Contact for pricing
+   - Growth Tier   (revenue $10M–$50M/yr): Contact for pricing
+   - Enterprise    (revenue > $50M/yr):    Contact for pricing
+
+   Contact: licensing@idevsec.com
+
+6. SUPPORT & WARRANTY
+
+   Commercial licensees receive:
+   - Priority bug fixes and security patches
+   - Email support (response within 2 business days)
+   - Access to private roadmap and early releases
+
+7. TERM & TERMINATION
+
+   This license is perpetual unless terminated. Licensor may terminate
+   this Agreement if Licensee breaches any term and fails to cure within
+   30 days of written notice.
+
+8. DISCLAIMER
+
+   THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND.
+   LICENSOR SHALL NOT BE LIABLE FOR ANY DAMAGES ARISING FROM USE
+   OF THE SOFTWARE.
+
+9. GOVERNING LAW
+
+   This Agreement shall be governed by the laws of India.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+To obtain a Commercial License, contact:
+  Email : licensing@idevsec.com
+  Web   : https://idevsec.com/creduent/licensing
+
+IDevSec
+https://idevsec.com

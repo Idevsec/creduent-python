@@ -1,0 +1,53 @@
+CREDUENT PROTOCOL — DUAL LICENSE
+Copyright (c) 2026 IDevSec. All Rights Reserved.
+
+The Creduent Protocol is distributed under a Dual License model:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+LICENSE 1 — APACHE 2.0 (Open Source)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For open source projects, personal use, research, academia, and
+organizations with annual revenue under USD $1,000,000.
+
+You may freely use, modify, and distribute this software under the
+terms of the Apache License 2.0.
+
+Full text: See LICENSE-APACHE in this repository
+Online   : https://www.apache.org/licenses/LICENSE-2.0
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+LICENSE 2 — COMMERCIAL LICENSE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For commercial products, SaaS platforms, enterprise deployments,
+proprietary forks, and organizations with annual revenue exceeding
+USD $1,000,000.
+
+A paid commercial license is required. This grants you:
+  - Rights to embed Creduent in proprietary/closed-source products
+  - Rights to deploy private or white-label registries
+  - Priority support and access to private roadmap
+
+Full text: See LICENSE-COMMERCIAL in this repository
+Contact  : licensing@idevsec.com
+Web      : https://idevsec.com/creduent/licensing
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHICH LICENSE APPLIES TO YOU?
+
+  ✅ Open source project?         → Apache 2.0 (free)
+  ✅ Personal / research use?     → Apache 2.0 (free)
+  ✅ Startup < $1M revenue?       → Apache 2.0 (free)
+  💰 Commercial SaaS product?    → Commercial License required
+  💰 Enterprise internal use?    → Commercial License required
+  💰 Proprietary fork?           → Commercial License required
+  💰 White-label registry?       → Commercial License required
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+IDevSec — https://idevsec.com
+Creduent Protocol — https://creduent.idevsec.com
