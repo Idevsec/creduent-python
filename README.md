@@ -447,7 +447,13 @@ load_dotenv()  # Skips loading in Vercel (VERCEL=1) to avoid clobbering prod env
 
 ## Changelog
 
-### v0.4.0 (Current)
+### v0.4.1 (Current)
+- Normalized `pyproject.toml` line endings from CRLF (`\r\n`) to LF (`\n`).
+- Fixed metadata inconsistency by adding `python_requires=">=3.10"` to `setup.py` (matching `pyproject.toml`).
+- Replaced the invalid `{text = "Apache-2.0 OR Commercial"}` SPDX expression in `pyproject.toml` with `license-files` declaration to properly package `LICENSE`, `LICENSE-APACHE`, and `LICENSE-COMMERCIAL` for PyPI.
+- Created initial `CHANGELOG.md` tracking detailed package version history.
+
+### v0.4.0
 - Changed project license from MIT to Dual Licensing (Apache-2.0 and Commercial License).
 - Updated package author metadata to IDevSec.
 - Removed FastAPI dependency from client SDK/CLI.
