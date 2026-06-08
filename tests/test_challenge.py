@@ -130,5 +130,54 @@ class TestChallengeResponse(unittest.TestCase):
             )
             self.assertFalse(is_valid)
 
+    @patch("creduent.challenge.safe_requests_get")
+    @patch("creduent.challenge.safe_requests_post")
+    def test_verify_proof_with_pinned_key(self, mock_post_fn, mock_get_fn):
+        mock_get_fn.side_effect = self.mock_get
+        mock_post_fn.side_effect = self.mock_post
+        
+        proof = challenge.create_proof(
+            agent_id=self.agent_id,
+            private_key_pem=self.private_pem,
+            registry_url="https://api.idevsec.com"
+        )
+        
+        # Get registry public key to verify
+        pub_response = self.client.get("/registry/public-key")
+        self.assertEqual(pub_response.status_code, 200)
+        registry_pubkey = pub_response.json()["public_key"]
+        
+        with patch("creduent.challenge.attest") as mock_attest:
+            from creduent.attest import AttestResult
+            mock_attest.return_value = AttestResult(
+                attested=True,
+                level="trusted",
+                issued_at="2026-05-31T00:00:00Z",
+                expires_at="2027-05-31T00:00:00Z"
+            )
+            
+            # 1. Test verification using argument pinning (avoids dynamic get)
+            with patch("creduent.challenge.safe_requests_get", side_effect=Exception("Should not fetch")):
+                is_valid = challenge.verify_proof(
+                    proof_token=proof["proof_token"],
+                    agent_id=self.agent_id,
+                    registry_url="https://api.idevsec.com",
+                    registry_pubkey=registry_pubkey
+                )
+                self.assertTrue(is_valid)
+
+            # 2. Test verification using env variable pinning (avoids dynamic get)
+            os.environ["CREDUENT_REGISTRY_PUBKEY"] = registry_pubkey
+            try:
+                with patch("creduent.challenge.safe_requests_get", side_effect=Exception("Should not fetch")):
+                    is_valid = challenge.verify_proof(
+                        proof_token=proof["proof_token"],
+                        agent_id=self.agent_id,
+                        registry_url="https://api.idevsec.com"
+                    )
+                    self.assertTrue(is_valid)
+            finally:
+                del os.environ["CREDUENT_REGISTRY_PUBKEY"]
+
 if __name__ == '__main__':
     unittest.main()

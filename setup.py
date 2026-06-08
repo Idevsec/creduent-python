@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="creduent",
-    version="0.4.1",
+    version="0.4.2",
     author="IDevSec",
     url="https://github.com/idevsec/creduent",
     packages=find_packages(),

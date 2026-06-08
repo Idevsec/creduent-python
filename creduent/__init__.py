@@ -7,6 +7,7 @@ from creduent.verify import verify, VerifyResult
 from creduent.register import register, RegisterResult
 from creduent.attest import attest, AttestResult
 from creduent.exceptions import (
+    CreduentError,
     CreduEntError,
     VerificationError,
     RegistrationError,
@@ -23,6 +24,7 @@ __all__ = [
     "RegisterResult",
     "attest",
     "AttestResult",
+    "CreduentError",
     "CreduEntError",
     "VerificationError",
     "RegistrationError",

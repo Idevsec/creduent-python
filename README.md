@@ -296,7 +296,7 @@ curl -X POST https://api.idevsec.com/registry/register \
 ## Quickstart (Full Example)
 
 ```python
-from creduent import generate_keys, sign, verify, register, attest, CreduEntError
+from creduent import generate_keys, sign, verify, register, attest, CreduentError
 
 try:
     # 1. Generate keypair
@@ -329,7 +329,7 @@ try:
     att = attest("agent://creduent/reconbot")
     print(f"Attested: {att.attested}, Level: {att.level}")
 
-except CreduEntError as e:
+except CreduentError as e:
     print(f"Error: {e}")
 ```
 

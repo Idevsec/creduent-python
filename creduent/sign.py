@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.hazmat.primitives import serialization
 from creduent.crypto import canonicalize
-from creduent.exceptions import CreduEntError
+from creduent.exceptions import CreduentError
 
 def generate_keys() -> tuple[str, str]:
     """Generate a new Ed25519 keypair.
@@ -20,7 +20,7 @@ def generate_keys() -> tuple[str, str]:
             and the public key prefixed with "ed25519:".
 
     Raises:
-        CreduEntError: If key generation or formatting fails.
+        CreduentError: If key generation or formatting fails.
     """
     try:
         private_key = ed25519.Ed25519PrivateKey.generate()
@@ -44,7 +44,7 @@ def generate_keys() -> tuple[str, str]:
         
         return private_key_pem, public_key_str
     except Exception as e:
-        raise CreduEntError(f"Failed to generate keys: {e}")
+        raise CreduentError(f"Failed to generate keys: {e}")
 
 def sign(draft: dict, private_key_pem: str) -> dict:
     """Sign a draft agent.json dict and return the signed document.
@@ -59,11 +59,11 @@ def sign(draft: dict, private_key_pem: str) -> dict:
         dict: The signed agent.json dictionary with the signature included.
 
     Raises:
-        CreduEntError: If input validation fails or if there is an error
+        CreduentError: If input validation fails or if there is an error
             during key parsing, JCS canonicalization, or signing.
     """
     if not isinstance(draft, dict):
-        raise CreduEntError("Draft must be a dictionary")
+        raise CreduentError("Draft must be a dictionary")
         
     doc = draft.copy()
     
@@ -84,7 +84,7 @@ def sign(draft: dict, private_key_pem: str) -> dict:
         if not isinstance(private_key, ed25519.Ed25519PrivateKey):
             raise ValueError("Key is not an Ed25519 private key")
     except Exception as e:
-        raise CreduEntError(f"Failed parsing private key PEM: {e}")
+        raise CreduentError(f"Failed parsing private key PEM: {e}")
         
     try:
         # JCS canonicalization
@@ -99,7 +99,7 @@ def sign(draft: dict, private_key_pem: str) -> dict:
         doc["signature"] = signature_b64
         return doc
     except Exception as e:
-        raise CreduEntError(f"Failed during JCS canonicalization or signing: {e}")
+        raise CreduentError(f"Failed during JCS canonicalization or signing: {e}")
 
 def print_help() -> None:
     """Print a styled help message for the signing CLI."""

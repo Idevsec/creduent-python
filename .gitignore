@@ -14,3 +14,8 @@ venv/
 registry_db.json
 tests/__pycache__/
 creduent/__pycache__/
+
+# Claude / Agent rules
+CLAUDE.md
+AGENTS.md
+

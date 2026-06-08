@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] - 2026-06-08
+
+### Added
+- Dynamic public key pinning verification support in `challenge.verify_proof` via optional argument or `CREDUENT_REGISTRY_PUBKEY` environment variable.
+- Outbound IPv6 DNS resolution support in `utils.resolve_ips` using `socket.getaddrinfo`.
+
+### Changed
+- Standardized the base exception class name from `CreduEntError` to `CreduentError` for symmetry with JS/CLI, maintaining `CreduEntError` as a backward-compatible alias.
+
 ## [0.4.1] - 2026-06-02
 
 ### Fixed

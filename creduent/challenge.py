@@ -2,13 +2,14 @@ import base64
 import hashlib
 import json
 import urllib.parse
+from typing import Optional
 from datetime import datetime, timezone
 from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.hazmat.primitives import serialization
 from cryptography.exceptions import InvalidSignature
 
 from creduent.utils import safe_requests_get, safe_requests_post
-from creduent.exceptions import CreduEntError, VerificationError
+from creduent.exceptions import CreduentError, VerificationError
 from creduent.crypto import canonicalize
 from creduent.attest import attest
 
@@ -33,7 +34,7 @@ def create_proof(
         dict: The response containing proof_token, verified status, etc.
 
     Raises:
-        CreduEntError: If any step of the challenge-response flow fails.
+        CreduentError: If any step of the challenge-response flow fails.
     """
     base_url = registry_url.rstrip('/')
     escaped_agent_id = urllib.parse.quote(agent_id, safe='')
@@ -57,9 +58,9 @@ def create_proof(
                 response = safe_requests_get(fallback_url, timeout=10)
                 verify_url = f"{base_url}/verify-challenge"
             except Exception as inner_e:
-                raise CreduEntError(f"Connection to Creduent registry failed: {inner_e}")
+                raise CreduentError(f"Connection to Creduent registry failed: {inner_e}")
         else:
-            raise CreduEntError(f"Connection to Creduent registry failed: {e}")
+            raise CreduentError(f"Connection to Creduent registry failed: {e}")
 
     if response.status_code != 200:
         err_msg = response.text
@@ -69,17 +70,17 @@ def create_proof(
                 err_msg = err_json["detail"]
         except Exception:
             pass
-        raise CreduEntError(f"Failed to fetch challenge: HTTP {response.status_code} - {err_msg}")
+        raise CreduentError(f"Failed to fetch challenge: HTTP {response.status_code} - {err_msg}")
 
     try:
         challenge_data = response.json()
     except Exception as e:
-        raise CreduEntError(f"Registry returned invalid JSON for challenge: {e}")
+        raise CreduentError(f"Registry returned invalid JSON for challenge: {e}")
 
     challenge = challenge_data.get("challenge")
     nonce = challenge_data.get("nonce")
     if not challenge or not nonce:
-        raise CreduEntError("Registry challenge response missing required fields")
+        raise CreduentError("Registry challenge response missing required fields")
 
     # Step 2: Sign (challenge + nonce) using agent's private key
     try:
@@ -90,7 +91,7 @@ def create_proof(
         if not isinstance(private_key, ed25519.Ed25519PrivateKey):
             raise ValueError("Key is not an Ed25519 private key")
     except Exception as e:
-        raise CreduEntError(f"Failed parsing private key PEM: {e}")
+        raise CreduentError(f"Failed parsing private key PEM: {e}")
 
     try:
         message_str = challenge + nonce
@@ -98,7 +99,7 @@ def create_proof(
         signature_bytes = private_key.sign(hashed_bytes)
         signature_b64 = base64.b64encode(signature_bytes).decode('utf-8')
     except Exception as e:
-        raise CreduEntError(f"Failed to sign challenge: {e}")
+        raise CreduentError(f"Failed to sign challenge: {e}")
 
     # Step 3: Call POST /verify-challenge
     payload = {
@@ -110,7 +111,7 @@ def create_proof(
     try:
         verify_response = safe_requests_post(verify_url, json=payload, timeout=10)
     except Exception as e:
-        raise CreduEntError(f"Connection to Creduent registry for verify failed: {e}")
+        raise CreduentError(f"Connection to Creduent registry for verify failed: {e}")
 
     if verify_response.status_code != 200:
         err_msg = verify_response.text
@@ -120,23 +121,24 @@ def create_proof(
                 err_msg = err_json["detail"]
         except Exception:
             pass
-        raise CreduEntError(f"Challenge verification failed: HTTP {verify_response.status_code} - {err_msg}")
+        raise CreduentError(f"Challenge verification failed: HTTP {verify_response.status_code} - {err_msg}")
 
     try:
         return verify_response.json()
     except Exception as e:
-        raise CreduEntError(f"Registry returned invalid JSON for verification response: {e}")
+        raise CreduentError(f"Registry returned invalid JSON for verification response: {e}")
 
 def verify_proof(
     proof_token: str,
     agent_id: str,
-    registry_url: str = "https://api.idevsec.com"
+    registry_url: str = "https://api.idevsec.com",
+    registry_pubkey: Optional[str] = None
 ) -> bool:
     """Verifies a signed challenge proof token.
 
     1. Decodes and parses the proof_token payload
     2. Fetches the agent's attestation status to verify they are active/registered
-    3. Fetches the registry's public key
+    3. Identifies the registry's public key (pinned argument, environment variable, or dynamic fallback)
     4. Verifies the proof token signature using the registry's public key
     5. Checks validity timestamp
 
@@ -144,6 +146,7 @@ def verify_proof(
         proof_token: The base64-encoded signed proof token string
         agent_id: The agent ID (e.g. agent://cyberhavox/havox-ai)
         registry_url: The registry base URL
+        registry_pubkey: The expected registry public key (optional pinning)
 
     Returns:
         bool: True if signature and token are valid, False otherwise
@@ -192,32 +195,39 @@ def verify_proof(
     except Exception:
         return False
 
-    # Step 4: Fetch registry public key
-    base_url = registry_url.rstrip('/')
-    if base_url.endswith('/registry'):
-        pubkey_url = f"{base_url}/public-key"
-    else:
-        pubkey_url = f"{base_url}/registry/public-key"
+    # Step 4: Determine registry public key
+    pubkey_str = registry_pubkey
+    if not pubkey_str:
+        import os
+        pubkey_str = os.environ.get("CREDUENT_REGISTRY_PUBKEY")
 
-    try:
-        pub_response = safe_requests_get(pubkey_url, timeout=10)
+    if not pubkey_str:
+        # Fallback to fetching dynamically
+        base_url = registry_url.rstrip('/')
+        if base_url.endswith('/registry'):
+            pubkey_url = f"{base_url}/public-key"
+        else:
+            pubkey_url = f"{base_url}/registry/public-key"
+
+        try:
+            pub_response = safe_requests_get(pubkey_url, timeout=10)
+            if pub_response.status_code != 200:
+                if not base_url.endswith('/registry'):
+                    fallback_pubkey_url = f"{base_url}/public-key"
+                    pub_response = safe_requests_get(fallback_pubkey_url, timeout=10)
+        except Exception:
+            return False
+
         if pub_response.status_code != 200:
-            if not base_url.endswith('/registry'):
-                fallback_pubkey_url = f"{base_url}/public-key"
-                pub_response = safe_requests_get(fallback_pubkey_url, timeout=10)
-    except Exception:
-        return False
+            return False
 
-    if pub_response.status_code != 200:
-        return False
+        try:
+            pub_data = pub_response.json()
+            pubkey_str = pub_data.get("public_key", "")
+        except Exception:
+            return False
 
-    try:
-        pub_data = pub_response.json()
-        pubkey_str = pub_data.get("public_key", "")
-    except Exception:
-        return False
-
-    if not pubkey_str.startswith("ed25519:"):
+    if not pubkey_str or not pubkey_str.startswith("ed25519:"):
         return False
 
     # Step 5: Verify signature using registry public key
