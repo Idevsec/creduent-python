@@ -449,16 +449,15 @@ load_dotenv()  # Skips loading in Vercel (VERCEL=1) to avoid clobbering prod env
 
 > Full history: [CHANGELOG.md](CHANGELOG.md)
 
-### v0.4.5 (Current)
-- Resolved PyPI `400 Bad Request` error caused by re-uploading an already-published version. Version bumped with a clean `dist/` rebuild.
+### v0.4.7 (Current)
+- Cleaned up and consolidated public release history to remove internal packaging/deployment details.
 
-### v0.4.4
-- Updated project URL from `idevsec/creduent` to `idevsec/creduent-python` in `pyproject.toml` and `setup.py`.
-- Configured `~/.pypirc` for token-based PyPI publishing.
+### v0.4.6
+- Documentation updates and formatting fixes in `README.md`.
 
-### v0.4.3
-- Version bumped to stay in sync with registry `1.0.3` deployment.
-- Confirmed compatibility with registry `1.0.3` premium dashboard (Level, Renew, Revoke modal card headers, mobile card stack layout).
+### v0.4.3 - v0.4.5
+- **Infrastructure:** Updated project repository URL and configured token-based PyPI publishing.
+- **Maintenance:** Internal version bumps to align with registry `1.0.3` deployment and resolve publishing metadata (no public API changes).
 
 ### v0.4.2
 - Added dynamic public key pinning verification support in `challenge.verify_proof` via optional argument or `CREDUENT_REGISTRY_PUBKEY` environment variable.

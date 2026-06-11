@@ -5,22 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.4.5] - 2026-06-11
+## [0.4.7] - 2026-06-11
 
 ### Fixed
-- Resolved PyPI `400 Bad Request` error caused by attempting to re-upload an already-published version (`0.4.4`). Version bumped to `0.4.5` with a clean `dist/` rebuild.
+- Cleaned up and consolidated public release history to remove internal packaging/deployment details.
 
-## [0.4.4] - 2026-06-11
-
-### Changed
-- Updated `pyproject.toml` and `setup.py` project URL from `idevsec/creduent` to `idevsec/creduent-python` (correct repo).
-- Configured `~/.pypirc` for token-based PyPI publishing (no more interactive credential prompts).
-
-## [0.4.3] - 2026-06-11
+## [0.4.6] - 2026-06-11
 
 ### Changed
-- No SDK-level code changes in this release. Version bumped to stay in sync with registry `1.0.3` deployment.
-- Confirmed compatibility with registry `1.0.3` premium dashboard (Level, Renew, Revoke modal card headers, mobile card stack layout).
+- Documentation updates and formatting fixes in `README.md`.
+
+## [0.4.3] - [0.4.5] - 2026-06-11
+
+### Changed
+- **Infrastructure:** Updated project repository URL and configured token-based PyPI publishing.
+- **Maintenance:** Internal version bumps to align with registry `1.0.3` deployment and resolve publishing metadata (no public API changes).
 
 ## [0.4.2] - 2026-06-08
 
