@@ -447,7 +447,25 @@ load_dotenv()  # Skips loading in Vercel (VERCEL=1) to avoid clobbering prod env
 
 ## Changelog
 
-### v0.4.1 (Current)
+> Full history: [CHANGELOG.md](CHANGELOG.md)
+
+### v0.4.5 (Current)
+- Resolved PyPI `400 Bad Request` error caused by re-uploading an already-published version. Version bumped with a clean `dist/` rebuild.
+
+### v0.4.4
+- Updated project URL from `idevsec/creduent` to `idevsec/creduent-python` in `pyproject.toml` and `setup.py`.
+- Configured `~/.pypirc` for token-based PyPI publishing.
+
+### v0.4.3
+- Version bumped to stay in sync with registry `1.0.3` deployment.
+- Confirmed compatibility with registry `1.0.3` premium dashboard (Level, Renew, Revoke modal card headers, mobile card stack layout).
+
+### v0.4.2
+- Added dynamic public key pinning verification support in `challenge.verify_proof` via optional argument or `CREDUENT_REGISTRY_PUBKEY` environment variable.
+- Outbound IPv6 DNS resolution support in `utils.resolve_ips` using `socket.getaddrinfo`.
+- Standardized exception class name from `CreduEntError` to `CreduentError` (backward-compatible alias retained).
+
+### v0.4.1
 - Normalized `pyproject.toml` line endings from CRLF (`\r\n`) to LF (`\n`).
 - Fixed metadata inconsistency by adding `python_requires=">=3.10"` to `setup.py` (matching `pyproject.toml`).
 - Replaced the invalid `{text = "Apache-2.0 OR Commercial"}` SPDX expression in `pyproject.toml` with `license-files` declaration to properly package `LICENSE`, `LICENSE-APACHE`, and `LICENSE-COMMERCIAL` for PyPI.
@@ -482,6 +500,7 @@ load_dotenv()  # Skips loading in Vercel (VERCEL=1) to avoid clobbering prod env
 
 ### v0.1.2
 - Initial release: core signing, verification, and registration logic.
+
 
 ---
 
