@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.5] - 2026-06-11
+
+### Fixed
+- Resolved PyPI `400 Bad Request` error caused by attempting to re-upload an already-published version (`0.4.4`). Version bumped to `0.4.5` with a clean `dist/` rebuild.
+
 ## [0.4.4] - 2026-06-11
 
 ### Changed
