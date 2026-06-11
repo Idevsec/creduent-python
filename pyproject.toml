@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "creduent"
-version = "0.4.2"
+version = "0.4.3"
 description = "Creduent Protocol SDK - cryptographic identity for AI agents"
 
 authors = [
@@ -24,8 +24,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/idevsec/creduent"
-Repository = "https://github.com/idevsec/creduent"
+Homepage = "https://github.com/idevsec/creduent-python"
+Repository = "https://github.com/idevsec/creduent-python"
 
 [project.scripts]
 creduent-sign = "creduent.sign:main"
