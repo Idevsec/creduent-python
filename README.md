@@ -36,7 +36,7 @@ pip install creduent
 ```
 +------------------+             +----------------------+             +------------------+
 |   Agent Domain   |             |   Creduent Registry  |             |   Agent Client   |
-|   (agent.json)   |             |   api.idevsec.com    |             |    (MCP Host)    |
+|   (agent.json)   |             | registry.idevsec.com |             |    (MCP Host)    |
 +------------------+             +----------------------+             +------------------+
          |                                |                                |
          |---- 1. Serve agent.json ------>|                                |
@@ -192,7 +192,7 @@ When adding the _creduent TXT record in Cloudflare DNS:
 |-------|-------|-----|
 | Failed to fetch agent.json: HTTP 403 | Cloudflare WAF blocking registry server | Add the WAF rule above |
 | Failed to fetch agent.json: HTTP 403 (after adding rules) | Bot Fight Mode JS challenge | Disable JS Detections under Security → Bots |
-| Registration succeeds but resolver shows 403 | CSP blocking api.idevsec.com | Add api.idevsec.com to connect-src in your site's CSP headers |
+| Registration succeeds but resolver shows 403 | CSP blocking registry.idevsec.com | Add registry.idevsec.com to connect-src in your site's CSP headers |
 
 ---
 
@@ -238,7 +238,7 @@ else:
 
 Or via curl:
 ```bash
-curl -X POST https://api.idevsec.com/registry/register \
+curl -X POST https://registry.idevsec.com/registry/register \
   -H "Content-Type: application/json" \
   -d '{
     "agent_id": "agent://yourorg/youragent",
@@ -308,7 +308,7 @@ try:
         "agent_id": "agent://creduent/reconbot",
         "owner": "IDevSec",
         "public_key": public_key_str,
-        "endpoint": "https://api.idevsec.com/recon",
+        "endpoint": "https://registry.idevsec.com/recon",
         "capabilities": ["osint", "dns_lookup"]
     }
     signed_doc = sign(draft, private_key_pem)
@@ -320,8 +320,8 @@ try:
     # 4. Register with registry (requires DNS + hosted agent.json)
     reg = register(
         agent_id="agent://creduent/reconbot",
-        domain="api.idevsec.com",
-        agent_json_url="https://api.idevsec.com/.well-known/agent.json"
+        domain="registry.idevsec.com",
+        agent_json_url="https://registry.idevsec.com/.well-known/agent.json"
     )
     print(f"Registered: {reg.success}, Level: {reg.attestation['level']}")
 

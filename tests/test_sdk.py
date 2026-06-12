@@ -42,7 +42,7 @@ class TestCreduentSDK(unittest.TestCase):
             "agent_id": "agent://creduent/reconbot",
             "owner": "Creduent",
             "public_key": public_key_str,
-            "endpoint": "https://api.idevsec.com/recon",
+            "endpoint": "https://registry.idevsec.com/recon",
             "capabilities": ["osint", "dns_lookup", "vulnerability_scan"]
         }
         
@@ -59,7 +59,7 @@ class TestCreduentSDK(unittest.TestCase):
         
     def test_verify_live_endpoint(self):
         """3. verify() on the live endpoint returns valid=True"""
-        target = "https://api.idevsec.com/.well-known/agent.json"
+        target = "https://registry.idevsec.com/.well-known/agent.json"
         try:
             result = verify(target)
             self.assertTrue(result.valid)
@@ -77,7 +77,7 @@ class TestCreduentSDK(unittest.TestCase):
             "agent_id": "agent://creduent/reconbot",
             "owner": "Creduent",
             "public_key": public_key_str,
-            "endpoint": "https://api.idevsec.com/recon",
+            "endpoint": "https://registry.idevsec.com/recon",
             "capabilities": ["osint", "dns_lookup", "vulnerability_scan"]
         }
         
@@ -96,9 +96,9 @@ class TestCreduentSDK(unittest.TestCase):
         self.assertIsNotNone(res_tampered.error)
         
     def test_attest_live(self):
-        """5. attest() against https://api.idevsec.com returns a valid AttestResult"""
+        """5. attest() against https://registry.idevsec.com returns a valid AttestResult"""
         try:
-            result = attest("agent://creduent/reconbot", "https://api.idevsec.com")
+            result = attest("agent://creduent/reconbot", "https://registry.idevsec.com")
             # The agent might or might not be currently registered in the database, 
             # but the result should be a valid AttestResult dataclass
             self.assertIn(result.attested, [True, False])
