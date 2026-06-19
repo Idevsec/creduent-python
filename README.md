@@ -12,13 +12,13 @@ Creduent enables autonomous agents to cryptographically sign metadata, verify id
 
 ## Key Features
 
-- 🔑 **Cryptographic Identity Management**: Generate secure Ed25519 keypairs for AI agents (multi-key support enabled).
-- ✍️ **RFC 8785 Canonical Signatures**: Compute cryptographic signatures over JSON agent documents using JCS and Ed25519.
-- 🔗 **DNS Trust Binding**: Verify cryptographic bindings between `agent://` identifiers and web domains.
-- 🏛️ **Registry Integration**: Register agents and resolve signed attestations from the Creduent Registry.
-- 📡 **Discovery API**: Directly fetch and parse an agent's `agent.json` from their well-known endpoint without needing the registry.
-- 🤖 **Framework Integrations**: Native middleware/tools for **CrewAI**, **LangGraph**, and **AutoGen**.
-- 🛠️ **Unified CLI `creduent`**: Out-of-the-box CLI commands for CRD scaffolding, signing, and capability discovery.
+- **Cryptographic Identity Management**: Generate secure Ed25519 keypairs for AI agents (multi-key support enabled).
+- **RFC 8785 Canonical Signatures**: Compute cryptographic signatures over JSON agent documents using JCS and Ed25519.
+- **DNS Trust Binding**: Verify cryptographic bindings between `agent://` identifiers and web domains.
+- **Registry Integration**: Register agents and resolve signed attestations from the Creduent Registry.
+- **Discovery API**: Directly fetch and parse an agent's `agent.json` from their well-known endpoint without needing the registry.
+- **Framework Integrations**: Native middleware/tools for **CrewAI**, **LangGraph**, and **AutoGen**.
+- **Unified CLI `creduent`**: Out-of-the-box CLI commands for CRD scaffolding, signing, and capability discovery.
 
 ---
 
