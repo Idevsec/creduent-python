@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "creduent"
-version = "0.5.0"
+version = "0.5.1"
 description = "Creduent Protocol SDK - open standard for cryptographic AI agent identity, Ed25519 signing, DNS verification, and attestation registry"
 
 authors = [
