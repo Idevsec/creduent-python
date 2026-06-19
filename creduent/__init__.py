@@ -6,6 +6,7 @@ from creduent.sign import generate_keys, sign
 from creduent.verify import verify, VerifyResult
 from creduent.register import register, RegisterResult
 from creduent.attest import attest, AttestResult
+from creduent.discovery import discover, DiscoveryResult, DiscoveryError
 from creduent.exceptions import (
     CreduentError,
     CreduEntError,
@@ -24,6 +25,9 @@ __all__ = [
     "RegisterResult",
     "attest",
     "AttestResult",
+    "discover",
+    "DiscoveryResult",
+    "DiscoveryError",
     "CreduentError",
     "CreduEntError",
     "VerificationError",

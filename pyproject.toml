@@ -4,32 +4,67 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "creduent"
-version = "0.4.8"
-description = "Creduent Protocol SDK - cryptographic identity for AI agents"
+version = "0.5.0"
+description = "Creduent Protocol SDK - open standard for cryptographic AI agent identity, Ed25519 signing, DNS verification, and attestation registry"
 
 authors = [
-    {name = "IDevSec"}
+    {name = "IDevSec", email = "contact@idevsec.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.10"
+keywords = [
+    "creduent",
+    "ai-agent",
+    "agent-identity",
+    "agent-trust",
+    "cryptographic-signing",
+    "ed25519",
+    "attestation",
+    "agent-json",
+    "open-standard",
+    "mcp",
+    "model-context-protocol",
+    "dns-verification",
+    "ai-security",
+    "autonomous-agent",
+    "jcs",
+    "rfc8785",
+    "idevsec"
+]
 classifiers = [
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
+    "Topic :: Security :: Cryptography",
+    "Topic :: Internet",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Intended Audience :: Developers",
+    "Development Status :: 4 - Beta",
 ]
 dependencies = [
     "cryptography",
     "requests",
     "jcs",
+    "PyYAML",
 ]
 
+[project.optional-dependencies]
+crewai = ["crewai"]
+langgraph = ["langgraph"]
+autogen = ["autogen"]
+all = ["crewai", "langgraph", "autogen"]
+
 [project.urls]
-Homepage = "https://github.com/idevsec/creduent-python"
+Homepage = "https://idevsec.com/creduent"
+Documentation = "https://idevsec.com/creduent/docs"
 Repository = "https://github.com/idevsec/creduent-python"
+Changelog = "https://github.com/idevsec/creduent-python/blob/main/CHANGELOG.md"
 
 [project.scripts]
-creduent-sign = "creduent.sign:main"
-creduent-verify = "creduent.verify:main"
+creduent = "creduent.cli:main"
 
 [tool.setuptools]
 license-files = ["LICENSE", "LICENSE-APACHE", "LICENSE-COMMERCIAL"]
@@ -37,3 +72,10 @@ license-files = ["LICENSE", "LICENSE-APACHE", "LICENSE-COMMERCIAL"]
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["creduent*"]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::DeprecationWarning:starlette.*",
+    "ignore::DeprecationWarning:fastapi.*",
+    "ignore:.*Using `httpx` with `starlette.testclient` is deprecated.*",
+]

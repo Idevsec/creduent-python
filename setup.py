@@ -12,6 +12,12 @@ setup(
         "requests",
         "jcs",
     ],
+    extras_require={
+        "crewai": ["crewai"],
+        "langgraph": ["langgraph"],
+        "autogen": ["autogen"],
+        "all": ["crewai", "langgraph", "autogen"],
+    },
     entry_points={
         "console_scripts": [
             "creduent-sign=creduent.sign:main",

@@ -1,6 +1,7 @@
 import os
 import sys
 import unittest
+from unittest.mock import patch
 import base64
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
@@ -12,6 +13,7 @@ from creduent import (
     sign,
     verify,
     attest,
+    discover,
     VerificationError,
     AttestationError
 )
@@ -111,6 +113,211 @@ class TestCreduentSDK(unittest.TestCase):
                 self.assertIsNotNone(result.error)
         except AttestationError as e:
             print(f"\n[WARNING] Live attestation test skipped/failed due to network: {e}")
+
+    def test_verify_multi_key_success(self):
+        """6. verify() with multiple keys succeeds if signed by an active key"""
+        priv1, pub1 = generate_keys()
+        priv2, pub2 = generate_keys()
+        
+        draft = {
+            "version": "1.1",
+            "agent_id": "agent://creduent/multi",
+            "owner": "Creduent",
+            "endpoint": "https://test",
+            "capabilities": [],
+            "keys": [
+                {"id": "key1", "type": "ed25519", "public_key": pub1, "status": "revoked"},
+                {"id": "key2", "type": "ed25519", "public_key": pub2, "status": "active"}
+            ]
+        }
+        
+        # Sign with active key
+        signed_doc = sign(draft, priv2)
+        res = verify(signed_doc)
+        self.assertTrue(res.valid)
+        self.assertEqual(res.public_key, pub2)
+
+    def test_verify_multi_key_revoked(self):
+        """7. verify() with multiple keys fails if signed by a revoked key"""
+        priv1, pub1 = generate_keys()
+        priv2, pub2 = generate_keys()
+        
+        draft = {
+            "version": "1.1",
+            "agent_id": "agent://creduent/multi",
+            "owner": "Creduent",
+            "endpoint": "https://test",
+            "capabilities": [],
+            "keys": [
+                {"id": "key1", "type": "ed25519", "public_key": pub1, "status": "revoked"},
+                {"id": "key2", "type": "ed25519", "public_key": pub2, "status": "active"}
+            ]
+        }
+        
+        # Sign with revoked key
+        signed_doc = sign(draft, priv1)
+        res = verify(signed_doc)
+        self.assertFalse(res.valid)
+        self.assertIn("Cryptographic signature in agent.json is INVALID", res.error)
+
+    def test_verify_multi_key_expired(self):
+        """8. verify() fails if the active key is expired"""
+        priv1, pub1 = generate_keys()
+        
+        draft = {
+            "version": "1.1",
+            "agent_id": "agent://creduent/multi",
+            "owner": "Creduent",
+            "endpoint": "https://test",
+            "capabilities": [],
+            "keys": [
+                {"id": "key1", "type": "ed25519", "public_key": pub1, "status": "active", "expires_at": "2020-01-01T00:00:00Z"}
+            ]
+        }
+        
+        signed_doc = sign(draft, priv1)
+        res = verify(signed_doc)
+        self.assertFalse(res.valid)
+        self.assertIn("Active key is expired", res.error)
+
+    @patch('creduent.verify.safe_requests_get')
+    def test_verify_cross_namespace_spoofing(self, mock_get):
+        """9. verify() rejects document if the claimed agent_id does not match the requested target"""
+        priv1, pub1 = generate_keys()
+        
+        # The document claims to be from attacker
+        draft = {
+            "version": "1.1",
+            "agent_id": "agent://attacker/bot",
+            "owner": "Attacker",
+            "endpoint": "https://attacker.com",
+            "capabilities": [],
+            "public_key": pub1
+        }
+        signed_doc = sign(draft, priv1)
+        
+        # Mock the request to return the attacker's document when we ask for stripe
+        class MockResponse:
+            def __init__(self, json_data, status_code):
+                self.json_data = json_data
+                self.status_code = status_code
+            def json(self):
+                return self.json_data
+                
+        mock_get.return_value = MockResponse(signed_doc, 200)
+        
+        # Requesting a stripe agent, but the registry/server returns the attacker doc
+        res = verify("agent://stripe/payments")
+        
+        self.assertFalse(res.valid)
+        self.assertIn("Cross-Namespace Spoofing Detected", res.error)
+
+    @patch('creduent.discovery.verify')
+    def test_discover_public_capabilities(self, mock_verify):
+        """10. discover() returns public capabilities without authentication"""
+        from creduent.verify import VerifyResult
+        
+        mock_verify.return_value = VerifyResult(
+            valid=True,
+            agent_id="agent://stripe/payments",
+            public_key="ed25519:test",
+            endpoint="https://api.stripe.com",
+            capabilities=["get_status"],
+            error=None
+        )
+        
+        res = discover("agent://stripe/payments")
+        
+        self.assertEqual(res.target_agent_id, "agent://stripe/payments")
+        self.assertEqual(res.endpoint, "https://api.stripe.com")
+        self.assertFalse(res.authenticated)
+        self.assertListEqual(res.capabilities, ["get_status"])
+
+    @patch('creduent.discovery.verify')
+    @patch('requests.post')
+    def test_discover_authenticated_capabilities(self, mock_post, mock_verify):
+        """11. discover() with auth fetches and merges private capabilities"""
+        from creduent.verify import VerifyResult
+        
+        mock_verify.return_value = VerifyResult(
+            valid=True,
+            agent_id="agent://stripe/payments",
+            public_key="ed25519:test",
+            endpoint="https://api.stripe.com",
+            capabilities=["get_status"],
+            error=None
+        )
+        
+        # Mock requests.post returning a private capability
+        class MockResponse:
+            def __init__(self, json_data, status_code):
+                self.json_data = json_data
+                self.status_code = status_code
+            def json(self):
+                return self.json_data
+                
+        mock_post.return_value = MockResponse({
+            "capabilities": [
+                {"name": "process_refund", "schema": "https://api.stripe.com/openapi.json"}
+            ]
+        }, 200)
+        
+        priv1, _ = generate_keys()
+        
+        res = discover("agent://stripe/payments", "agent://my/bot", priv1)
+        
+        self.assertEqual(res.target_agent_id, "agent://stripe/payments")
+        self.assertTrue(res.authenticated)
+        # Should merge the public "get_status" and the private dict
+        self.assertEqual(len(res.capabilities), 2)
+        self.assertEqual(res.capabilities[0], "get_status")
+        self.assertIsInstance(res.capabilities[1], dict)
+        self.assertEqual(res.capabilities[1]["name"], "process_refund")
+
+    def test_cli_commands(self):
+        """12. CLI init, keygen, and build commands execute successfully"""
+        import tempfile
+        import shutil
+        from creduent.cli import cmd_init, cmd_keygen, cmd_build
+        
+        # Save current directory
+        cwd = os.getcwd()
+        
+        # Create a temp dir
+        temp_dir = tempfile.mkdtemp()
+        try:
+            os.chdir(temp_dir)
+            
+            # Dummy args
+            class DummyArgs:
+                pass
+            args = DummyArgs()
+            
+            # Run init
+            cmd_init(args)
+            self.assertTrue(os.path.exists("agent.yaml"))
+            
+            # Run keygen
+            cmd_keygen(args)
+            self.assertTrue(os.path.exists(os.path.join(".creduent", "keys", "private.pem")))
+            self.assertTrue(os.path.exists(os.path.join(".creduent", "keys", "public.pub")))
+            
+            # Run build
+            cmd_build(args)
+            self.assertTrue(os.path.exists("agent.json"))
+            
+            # Verify the output is a valid agent.json
+            import json
+            with open("agent.json", "r") as f:
+                doc = json.load(f)
+                
+            res = verify(doc)
+            self.assertTrue(res.valid)
+            self.assertEqual(res.agent_id, "agent://namespace/my_agent")
+            
+        finally:
+            os.chdir(cwd)
+            shutil.rmtree(temp_dir)
 
 if __name__ == '__main__':
     unittest.main()

@@ -3,6 +3,7 @@ import sys
 import json
 import base64
 import argparse
+from datetime import datetime, timezone
 from dataclasses import dataclass
 from typing import List, Optional
 from cryptography.hazmat.primitives.asymmetric import ed25519
@@ -141,28 +142,59 @@ def verify(target: str | dict) -> VerifyResult:
         )
         
     agent_id = doc.get("agent_id", "")
-    public_key_str = doc.get("public_key", "")
+
+    if isinstance(target, str) and target.startswith("agent://"):
+        if agent_id != target:
+            return VerifyResult(
+                valid=False,
+                agent_id=agent_id,
+                public_key="",
+                endpoint="",
+                capabilities=[],
+                error=f"Cross-Namespace Spoofing Detected: Document claims agent_id '{agent_id}' but target was '{target}'"
+            )
+
     endpoint = doc.get("endpoint", "")
     capabilities = doc.get("capabilities", [])
     
+    # Extract keys array or fallback to legacy public_key
+    keys = doc.get("keys", [])
+    if not keys and "public_key" in doc:
+        keys = [{
+            "id": "legacy",
+            "type": "ed25519",
+            "public_key": doc.get("public_key"),
+            "status": "active"
+        }]
+    
+    # We will use the first active key we find as the primary 'public_key' for the VerifyResult, 
+    # but we will try validating against all active keys.
+    primary_public_key_str = ""
+    if keys and isinstance(keys, list):
+        for k in keys:
+            if isinstance(k, dict) and k.get("status") == "active":
+                primary_public_key_str = k.get("public_key", "")
+                break
+    
     # 1. Structural schema manual validation
-    required = ["version", "agent_id", "owner", "public_key", "endpoint", "capabilities", "signature"]
+    # public_key is no longer strictly required if keys is present
+    required = ["version", "agent_id", "owner", "endpoint", "capabilities", "signature"]
     for field in required:
         if field not in doc:
             return VerifyResult(
                 valid=False,
                 agent_id=agent_id,
-                public_key=public_key_str,
+                public_key=primary_public_key_str,
                 endpoint=endpoint,
                 capabilities=capabilities,
                 error=f"Missing required field '{field}' in agent.json"
             )
             
-    if doc.get("version") != "1.0":
+    if doc.get("version") not in ["1.0", "1.1"]:
         return VerifyResult(
             valid=False,
             agent_id=agent_id,
-            public_key=public_key_str,
+            public_key=primary_public_key_str,
             endpoint=endpoint,
             capabilities=capabilities,
             error=f"Unsupported protocol version: {doc.get('version')}"
@@ -172,65 +204,114 @@ def verify(target: str | dict) -> VerifyResult:
         return VerifyResult(
             valid=False,
             agent_id=agent_id,
-            public_key=public_key_str,
+            public_key=primary_public_key_str,
             endpoint=endpoint,
             capabilities=[],
             error="Capabilities field must be a list of strings"
         )
         
-    # 2. Cryptographic signature check
-    if not public_key_str.startswith("ed25519:"):
+    if not isinstance(keys, list) or len(keys) == 0:
         return VerifyResult(
             valid=False,
             agent_id=agent_id,
-            public_key=public_key_str,
+            public_key=primary_public_key_str,
             endpoint=endpoint,
             capabilities=capabilities,
-            error="Unsupported public key format. Only 'ed25519:' prefix is supported."
+            error="No keys found in agent.json (missing 'keys' array and legacy 'public_key')"
         )
         
+    # 2. Cryptographic signature check
+    signature_b64 = doc.get("signature")
     try:
-        pk_b64 = public_key_str.split(":", 1)[1]
-        public_key_bytes = base64.b64decode(pk_b64)
-        public_key = ed25519.Ed25519PublicKey.from_public_bytes(public_key_bytes)
-        
-        signature_b64 = doc.get("signature")
         signature_bytes = base64.b64decode(signature_b64)
-        
-        # Clone doc and remove signature before canonicalizing
-        doc_copy = doc.copy()
-        doc_copy.pop("signature", None)
-        
+    except Exception:
+        return VerifyResult(
+            valid=False,
+            agent_id=agent_id,
+            public_key=primary_public_key_str,
+            endpoint=endpoint,
+            capabilities=capabilities,
+            error="Signature is not valid base64."
+        )
+
+    # Clone doc and remove signature before canonicalizing
+    doc_copy = doc.copy()
+    doc_copy.pop("signature", None)
+    
+    try:
         canonical_str = canonicalize(doc_copy)
         canonical_bytes = canonical_str.encode('utf-8')
-        
-        public_key.verify(signature_bytes, canonical_bytes)
-    except InvalidSignature:
-        return VerifyResult(
-            valid=False,
-            agent_id=agent_id,
-            public_key=public_key_str,
-            endpoint=endpoint,
-            capabilities=capabilities,
-            error="Cryptographic signature in agent.json is INVALID."
-        )
     except Exception as e:
         return VerifyResult(
             valid=False,
             agent_id=agent_id,
-            public_key=public_key_str,
+            public_key=primary_public_key_str,
             endpoint=endpoint,
             capabilities=capabilities,
-            error=f"Signature verification failed: {e}"
+            error=f"Failed to canonicalize document: {e}"
         )
-        
+
+    now = datetime.now(timezone.utc)
+    validation_error = "No active valid keys found."
+    
+    for key_entry in keys:
+        if not isinstance(key_entry, dict):
+            continue
+            
+        if key_entry.get("status") != "active":
+            continue
+            
+        expires_at_str = key_entry.get("expires_at")
+        if expires_at_str:
+            try:
+                # Handle ISO format strings like "2027-01-01T00:00:00Z"
+                if expires_at_str.endswith('Z'):
+                    expires_at_str = expires_at_str[:-1] + '+00:00'
+                expires_at = datetime.fromisoformat(expires_at_str)
+                if expires_at < now:
+                    validation_error = "Active key is expired."
+                    continue
+            except ValueError:
+                # If we can't parse the expiry, we should treat the key as invalid for safety
+                validation_error = "Invalid expires_at format."
+                continue
+                
+        pub_key_str = key_entry.get("public_key", "")
+        if not pub_key_str.startswith("ed25519:"):
+            validation_error = "Unsupported public key format. Only 'ed25519:' prefix is supported."
+            continue
+            
+        try:
+            pk_b64 = pub_key_str.split(":", 1)[1]
+            public_key_bytes = base64.b64decode(pk_b64)
+            public_key = ed25519.Ed25519PublicKey.from_public_bytes(public_key_bytes)
+            
+            # Verify signature
+            public_key.verify(signature_bytes, canonical_bytes)
+            
+            # If we get here, verification succeeded with this key!
+            return VerifyResult(
+                valid=True,
+                agent_id=agent_id,
+                public_key=pub_key_str,
+                endpoint=endpoint,
+                capabilities=capabilities,
+                error=None
+            )
+            
+        except InvalidSignature:
+            validation_error = "Cryptographic signature in agent.json is INVALID for the tested key."
+        except Exception as e:
+            validation_error = f"Signature verification failed: {e}"
+            
+    # If we exit the loop, no active key validated the signature
     return VerifyResult(
-        valid=True,
+        valid=False,
         agent_id=agent_id,
-        public_key=public_key_str,
+        public_key=primary_public_key_str,
         endpoint=endpoint,
         capabilities=capabilities,
-        error=None
+        error=validation_error
     )
 
 def print_help() -> None:
