@@ -111,10 +111,10 @@ creduent build
 ### 4. Discover Agent Capabilities
 ```bash
 # Public discovery
-creduent discover agent://stripe/payments
+creduent discover agent://idevsec/reconbot
 
 # Authenticated discovery (presents your agent identity)
-creduent discover agent://stripe/payments --as agent://my_org/my_agent
+creduent discover agent://idevsec/reconbot --as agent://my_org/my_agent
 ```
 
 ---

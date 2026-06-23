@@ -141,7 +141,93 @@ def verify(target: str | dict) -> VerifyResult:
             error="Parsed document is not a JSON object"
         )
         
-    agent_id = doc.get("agent_id", "")
+    version = doc.get("version", "1.0")
+    if version not in ["1.0", "1.1", "2.0"]:
+        return VerifyResult(
+            valid=False,
+            agent_id="",
+            public_key="",
+            endpoint="",
+            capabilities=[],
+            error=f"Unsupported protocol version: {version}"
+        )
+
+    # Extract fields based on schema version
+    if version == "2.0":
+        identity = doc.get("identity", {})
+        policy = doc.get("policy", {})
+        
+        if not isinstance(identity, dict) or not isinstance(policy, dict):
+            return VerifyResult(
+                valid=False,
+                agent_id="",
+                public_key="",
+                endpoint="",
+                capabilities=[],
+                error="v2.0 agent document must contain identity and policy objects"
+            )
+            
+        agent_id = identity.get("agent_id", "")
+        endpoint = identity.get("endpoint", "")
+        capabilities = policy.get("capabilities", [])
+        keys = identity.get("keys", [])
+        
+        # Verify required inner fields exist
+        required_identity = ["agent_id", "owner", "keys", "endpoint"]
+        for field in required_identity:
+            if field not in identity:
+                return VerifyResult(
+                    valid=False,
+                    agent_id=agent_id,
+                    public_key="",
+                    endpoint=endpoint,
+                    capabilities=capabilities,
+                    error=f"Missing required field 'identity.{field}' in v2.0 agent.json"
+                )
+        if "capabilities" not in policy:
+            return VerifyResult(
+                valid=False,
+                agent_id=agent_id,
+                public_key="",
+                endpoint=endpoint,
+                capabilities=capabilities,
+                error="Missing required field 'policy.capabilities' in v2.0 agent.json"
+            )
+        if "signature" not in doc:
+            return VerifyResult(
+                valid=False,
+                agent_id=agent_id,
+                public_key="",
+                endpoint=endpoint,
+                capabilities=capabilities,
+                error="Missing required field 'signature' in v2.0 agent.json"
+            )
+    else:
+        agent_id = doc.get("agent_id", "")
+        endpoint = doc.get("endpoint", "")
+        capabilities = doc.get("capabilities", [])
+        
+        # Extract keys array or fallback to legacy public_key
+        keys = doc.get("keys", [])
+        if not keys and "public_key" in doc:
+            keys = [{
+                "id": "legacy",
+                "type": "ed25519",
+                "public_key": doc.get("public_key"),
+                "status": "active"
+            }]
+            
+        required_v1 = ["version", "agent_id", "owner", "endpoint", "capabilities", "signature"]
+        for field in required_v1:
+            if field not in doc:
+                return VerifyResult(
+                    valid=False,
+                    agent_id=agent_id,
+                    public_key="",
+                    endpoint=endpoint,
+                    capabilities=capabilities,
+                    error=f"Missing required field '{field}' in agent.json"
+                )
 
     if isinstance(target, str) and target.startswith("agent://"):
         if agent_id != target:
@@ -149,24 +235,11 @@ def verify(target: str | dict) -> VerifyResult:
                 valid=False,
                 agent_id=agent_id,
                 public_key="",
-                endpoint="",
-                capabilities=[],
+                endpoint=endpoint,
+                capabilities=capabilities,
                 error=f"Cross-Namespace Spoofing Detected: Document claims agent_id '{agent_id}' but target was '{target}'"
             )
 
-    endpoint = doc.get("endpoint", "")
-    capabilities = doc.get("capabilities", [])
-    
-    # Extract keys array or fallback to legacy public_key
-    keys = doc.get("keys", [])
-    if not keys and "public_key" in doc:
-        keys = [{
-            "id": "legacy",
-            "type": "ed25519",
-            "public_key": doc.get("public_key"),
-            "status": "active"
-        }]
-    
     # We will use the first active key we find as the primary 'public_key' for the VerifyResult, 
     # but we will try validating against all active keys.
     primary_public_key_str = ""
@@ -175,30 +248,6 @@ def verify(target: str | dict) -> VerifyResult:
             if isinstance(k, dict) and k.get("status") == "active":
                 primary_public_key_str = k.get("public_key", "")
                 break
-    
-    # 1. Structural schema manual validation
-    # public_key is no longer strictly required if keys is present
-    required = ["version", "agent_id", "owner", "endpoint", "capabilities", "signature"]
-    for field in required:
-        if field not in doc:
-            return VerifyResult(
-                valid=False,
-                agent_id=agent_id,
-                public_key=primary_public_key_str,
-                endpoint=endpoint,
-                capabilities=capabilities,
-                error=f"Missing required field '{field}' in agent.json"
-            )
-            
-    if doc.get("version") not in ["1.0", "1.1"]:
-        return VerifyResult(
-            valid=False,
-            agent_id=agent_id,
-            public_key=primary_public_key_str,
-            endpoint=endpoint,
-            capabilities=capabilities,
-            error=f"Unsupported protocol version: {doc.get('version')}"
-        )
         
     if not isinstance(capabilities, list):
         return VerifyResult(

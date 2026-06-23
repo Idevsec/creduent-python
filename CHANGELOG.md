@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-06-23
+
+### Added
+- **v2.0 Schema Split Support**: Added dynamic parsing and version-gating for the v2.0 schema structure separating `identity`, `policy`, and `signature` blocks.
+- **DNS Recovery Override Endpoint Support**: Updated SDK resolver to support recovery overrides.
+- **Multisig Quorum Authorization Support**: Implemented threshold signature verification client support.
+- **Expiry Enforcements**: Synced verification pipeline to handle the shortened 30-day attestation windows.
+
 ## [0.5.0] - 2026-06-19
 
 ### Added

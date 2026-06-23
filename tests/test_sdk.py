@@ -14,6 +14,9 @@ from creduent import (
     verify,
     attest,
     discover,
+    renew,
+    register_webhook,
+    query_webhook,
     VerificationError,
     AttestationError
 )
@@ -114,6 +117,28 @@ class TestCreduentSDK(unittest.TestCase):
         except AttestationError as e:
             print(f"\n[WARNING] Live attestation test skipped/failed due to network: {e}")
 
+    @patch('creduent.attest.safe_requests_get')
+    def test_attest_revoked_410(self, mock_get):
+        """5b. attest() handles HTTP 410 (revoked) status cleanly"""
+        class MockResponse:
+            def __init__(self, json_data, status_code):
+                self.json_data = json_data
+                self.status_code = status_code
+            def json(self):
+                return self.json_data
+            @property
+            def text(self):
+                return "Attestation revoked for agent."
+                
+        mock_get.return_value = MockResponse({
+            "detail": "Attestation revoked for agent."
+        }, 410)
+        
+        result = attest("agent://creduent/test-revoked")
+        self.assertFalse(result.attested)
+        self.assertEqual(result.level, "revoked")
+        self.assertEqual(result.error, "Attestation revoked for agent.")
+
     def test_verify_multi_key_success(self):
         """6. verify() with multiple keys succeeds if signed by an active key"""
         priv1, pub1 = generate_keys()
@@ -196,7 +221,7 @@ class TestCreduentSDK(unittest.TestCase):
         }
         signed_doc = sign(draft, priv1)
         
-        # Mock the request to return the attacker's document when we ask for stripe
+        # Mock the request to return the attacker's document when we ask for idevsec
         class MockResponse:
             def __init__(self, json_data, status_code):
                 self.json_data = json_data
@@ -206,8 +231,8 @@ class TestCreduentSDK(unittest.TestCase):
                 
         mock_get.return_value = MockResponse(signed_doc, 200)
         
-        # Requesting a stripe agent, but the registry/server returns the attacker doc
-        res = verify("agent://stripe/payments")
+        # Requesting a idevsec agent, but the registry/server returns the attacker doc
+        res = verify("agent://idevsec/reconbot")
         
         self.assertFalse(res.valid)
         self.assertIn("Cross-Namespace Spoofing Detected", res.error)
@@ -219,17 +244,17 @@ class TestCreduentSDK(unittest.TestCase):
         
         mock_verify.return_value = VerifyResult(
             valid=True,
-            agent_id="agent://stripe/payments",
+            agent_id="agent://idevsec/reconbot",
             public_key="ed25519:test",
-            endpoint="https://api.stripe.com",
+            endpoint="https://api.idevsec.com",
             capabilities=["get_status"],
             error=None
         )
         
-        res = discover("agent://stripe/payments")
+        res = discover("agent://idevsec/reconbot")
         
-        self.assertEqual(res.target_agent_id, "agent://stripe/payments")
-        self.assertEqual(res.endpoint, "https://api.stripe.com")
+        self.assertEqual(res.target_agent_id, "agent://idevsec/reconbot")
+        self.assertEqual(res.endpoint, "https://api.idevsec.com")
         self.assertFalse(res.authenticated)
         self.assertListEqual(res.capabilities, ["get_status"])
 
@@ -241,9 +266,9 @@ class TestCreduentSDK(unittest.TestCase):
         
         mock_verify.return_value = VerifyResult(
             valid=True,
-            agent_id="agent://stripe/payments",
+            agent_id="agent://idevsec/reconbot",
             public_key="ed25519:test",
-            endpoint="https://api.stripe.com",
+            endpoint="https://api.idevsec.com",
             capabilities=["get_status"],
             error=None
         )
@@ -258,15 +283,15 @@ class TestCreduentSDK(unittest.TestCase):
                 
         mock_post.return_value = MockResponse({
             "capabilities": [
-                {"name": "process_refund", "schema": "https://api.stripe.com/openapi.json"}
+                {"name": "process_refund", "schema": "https://api.idevsec.com/openapi.json"}
             ]
         }, 200)
         
         priv1, _ = generate_keys()
         
-        res = discover("agent://stripe/payments", "agent://my/bot", priv1)
+        res = discover("agent://idevsec/reconbot", "agent://my/bot", priv1)
         
-        self.assertEqual(res.target_agent_id, "agent://stripe/payments")
+        self.assertEqual(res.target_agent_id, "agent://idevsec/reconbot")
         self.assertTrue(res.authenticated)
         # Should merge the public "get_status" and the private dict
         self.assertEqual(len(res.capabilities), 2)
@@ -318,6 +343,85 @@ class TestCreduentSDK(unittest.TestCase):
         finally:
             os.chdir(cwd)
             shutil.rmtree(temp_dir)
+
+    @patch('requests.post')
+    def test_renew_payload_signing(self, mock_post):
+        """13. renew() signs the renewal payload and calls endpoint"""
+        class MockResponse:
+            def __init__(self, json_data, status_code):
+                self.json_data = json_data
+                self.status_code = status_code
+            def json(self):
+                return self.json_data
+                
+        mock_post.return_value = MockResponse({"success": True, "agent_id": "agent://my/bot"}, 200)
+        
+        priv, _ = generate_keys()
+        res = renew("agent://my/bot", "2026-12-31T23:59:59Z", priv)
+        
+        self.assertTrue(res.success)
+        self.assertEqual(res.attestation["agent_id"], "agent://my/bot")
+        
+        # Verify mock post was called with correct payload fields (signature, agent_id, new_expires_at)
+        mock_post.assert_called_once()
+        kwargs = mock_post.call_args[1]
+        self.assertIn("json", kwargs)
+        req_json = kwargs["json"]
+        self.assertEqual(req_json["agent_id"], "agent://my/bot")
+        self.assertEqual(req_json["new_expires_at"], "2026-12-31T23:59:59Z")
+        self.assertIn("signature", req_json)
+
+    @patch('requests.post')
+    def test_webhook_payload_signing(self, mock_post):
+        """14. register_webhook() signs payload and calls register endpoint"""
+        class MockResponse:
+            def __init__(self, json_data, status_code):
+                self.json_data = json_data
+                self.status_code = status_code
+            def json(self):
+                return self.json_data
+                
+        mock_post.return_value = MockResponse({
+            "agent_id": "agent://my/bot",
+            "webhook_url": "https://example.com/hook"
+        }, 200)
+        
+        priv, _ = generate_keys()
+        res = register_webhook("agent://my/bot", "https://example.com/hook", priv)
+        
+        self.assertTrue(res.success)
+        self.assertEqual(res.agent_id, "agent://my/bot")
+        self.assertEqual(res.webhook_url, "https://example.com/hook")
+        
+        mock_post.assert_called_once()
+        kwargs = mock_post.call_args[1]
+        req_json = kwargs["json"]
+        self.assertEqual(req_json["agent_id"], "agent://my/bot")
+        self.assertEqual(req_json["webhook_url"], "https://example.com/hook")
+        self.assertIn("signature", req_json)
+
+    @patch('requests.get')
+    def test_webhook_query(self, mock_get):
+        """15. query_webhook() makes GET request to webhook endpoint"""
+        class MockResponse:
+            def __init__(self, json_data, status_code):
+                self.json_data = json_data
+                self.status_code = status_code
+            def json(self):
+                return self.json_data
+                
+        mock_get.return_value = MockResponse({
+            "agent_id": "agent://my/bot",
+            "webhook_url": "https://example.com/hook"
+        }, 200)
+        
+        res = query_webhook("agent://my/bot")
+        
+        self.assertTrue(res.success)
+        self.assertEqual(res.agent_id, "agent://my/bot")
+        self.assertEqual(res.webhook_url, "https://example.com/hook")
+        mock_get.assert_called_once()
+
 
 if __name__ == '__main__':
     unittest.main()

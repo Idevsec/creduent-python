@@ -98,6 +98,15 @@ def attest(
             expires_at=None,
             error="Attestation not found or expired"
         )
+    elif response.status_code == 410:
+        # Agent is revoked
+        return AttestResult(
+            attested=False,
+            level="revoked",
+            issued_at=None,
+            expires_at=None,
+            error="Attestation revoked for agent."
+        )
     else:
         # Server or validation error
         err_detail = response.text

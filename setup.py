@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="creduent",
-    version="0.4.8",
+    version="0.5.1",
     author="IDevSec",
     url="https://github.com/idevsec/creduent-python",
     packages=find_packages(),
@@ -20,6 +20,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
+            "creduent=creduent.cli:main",
             "creduent-sign=creduent.sign:main",
             "creduent-verify=creduent.verify:main",
         ]

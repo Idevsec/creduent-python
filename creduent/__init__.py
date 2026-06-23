@@ -7,6 +7,8 @@ from creduent.verify import verify, VerifyResult
 from creduent.register import register, RegisterResult
 from creduent.attest import attest, AttestResult
 from creduent.discovery import discover, DiscoveryResult, DiscoveryError
+from creduent.renew import renew, RenewResult
+from creduent.webhook import register_webhook, query_webhook, WebhookResult
 from creduent.exceptions import (
     CreduentError,
     CreduEntError,
@@ -28,6 +30,11 @@ __all__ = [
     "discover",
     "DiscoveryResult",
     "DiscoveryError",
+    "renew",
+    "RenewResult",
+    "register_webhook",
+    "query_webhook",
+    "WebhookResult",
     "CreduentError",
     "CreduEntError",
     "VerificationError",
@@ -35,3 +42,4 @@ __all__ = [
     "AttestationError",
     "challenge"
 ]
+

@@ -174,17 +174,26 @@ def cmd_discover(args):
     
     priv_pem = None
     if my_agent_id:
-        env_key = os.environ.get("CREDUENT_PRIVATE_KEY")
-        if env_key:
-            priv_pem = env_key
+        if args.key and os.path.exists(args.key):
+            with open(args.key, "r") as f:
+                priv_pem = f.read()
         else:
-            priv_path = os.path.join(".creduent", "keys", "private.pem")
-            if os.path.exists(priv_path):
-                with open(priv_path, "r") as f:
-                    priv_pem = f.read()
+            env_key = os.environ.get("CREDUENT_PRIVATE_KEY")
+            if env_key:
+                priv_pem = env_key
             else:
-                print("Error: --as requires a private key in .creduent/keys/ or CREDUENT_PRIVATE_KEY env var.")
-                sys.exit(1)
+                priv_path = os.path.join(".creduent", "keys", "private.pem")
+                if os.path.exists(priv_path):
+                    with open(priv_path, "r") as f:
+                        priv_pem = f.read()
+                else:
+                    local_pem_path = "./private_key.pem"
+                    if os.path.exists(local_pem_path):
+                        with open(local_pem_path, "r") as f:
+                            priv_pem = f.read()
+                    else:
+                        print("Error: --as requires a private key in --key, .creduent/keys/, ./private_key.pem or CREDUENT_PRIVATE_KEY env var.")
+                        sys.exit(1)
                 
     result = discover(target, my_agent_id, priv_pem)
     
@@ -199,6 +208,113 @@ def cmd_discover(args):
             print(f"  - {cap.get('name')}: {cap.get('schema')}")
         else:
             print(f"  - {cap}")
+
+def cmd_renew(args):
+    """Renews an agent's attestation."""
+    agent_id = args.agent
+    days = args.days
+    
+    registry_url = os.environ.get("CREDUENT_REGISTRY_URL", "https://registry.idevsec.com")
+    
+    priv_pem = None
+    if args.key and os.path.exists(args.key):
+        with open(args.key, "r") as f:
+            priv_pem = f.read()
+    else:
+        env_key = os.environ.get("CREDUENT_PRIVATE_KEY")
+        if env_key:
+            priv_pem = env_key
+        else:
+            local_pem_path = "./private_key.pem"
+            if os.path.exists(local_pem_path):
+                with open(local_pem_path, "r") as f:
+                    priv_pem = f.read()
+            else:
+                dot_pem_path = os.path.join(".creduent", "keys", "private.pem")
+                if os.path.exists(dot_pem_path):
+                    with open(dot_pem_path, "r") as f:
+                        priv_pem = f.read()
+
+    if not priv_pem:
+        print("Error: No private key found. Use --key, set CREDUENT_PRIVATE_KEY, or place private_key.pem in the current folder.")
+        sys.exit(1)
+        
+    from datetime import datetime, timedelta, timezone
+    new_expires_dt = datetime.now(timezone.utc) + timedelta(days=days)
+    new_expires_at = new_expires_dt.isoformat(timespec='seconds').replace("+00:00", "Z")
+    
+    from creduent.renew import renew as sdk_renew
+    try:
+        result = sdk_renew(agent_id, new_expires_at, priv_pem, registry_url)
+        if result.success:
+            print("Successfully renewed agent attestation:")
+            print(json.dumps(result.attestation, indent=2))
+        else:
+            print(f"Error: {result.error}")
+            sys.exit(1)
+    except Exception as e:
+        print(f"Error during renewal: {e}")
+        sys.exit(1)
+
+def cmd_webhook(args):
+    """Manages webhooks (register or query)."""
+    subcommand = args.webhook_command
+    agent_id = args.agent
+    registry_url = os.environ.get("CREDUENT_REGISTRY_URL", "https://registry.idevsec.com")
+
+    if subcommand == "register":
+        url = args.url
+        priv_pem = None
+        if args.key and os.path.exists(args.key):
+            with open(args.key, "r") as f:
+                priv_pem = f.read()
+        else:
+            env_key = os.environ.get("CREDUENT_PRIVATE_KEY")
+            if env_key:
+                priv_pem = env_key
+            else:
+                local_pem_path = "./private_key.pem"
+                if os.path.exists(local_pem_path):
+                    with open(local_pem_path, "r") as f:
+                        priv_pem = f.read()
+                else:
+                    dot_pem_path = os.path.join(".creduent", "keys", "private.pem")
+                    if os.path.exists(dot_pem_path):
+                        with open(dot_pem_path, "r") as f:
+                            priv_pem = f.read()
+
+        if not priv_pem:
+            print("Error: No private key found. Use --key, set CREDUENT_PRIVATE_KEY, or place private_key.pem in the current folder.")
+            sys.exit(1)
+            
+        from creduent.webhook import register_webhook as sdk_register_webhook
+        try:
+            result = sdk_register_webhook(agent_id, url, priv_pem, registry_url)
+            if result.success:
+                print("Successfully registered webhook URL:")
+                print(f"  Agent ID:    {result.agent_id}")
+                print(f"  Webhook URL: {result.webhook_url}")
+            else:
+                print(f"Error: {result.error}")
+                sys.exit(1)
+        except Exception as e:
+            print(f"Error during webhook registration: {e}")
+            sys.exit(1)
+
+    elif subcommand == "query":
+        from creduent.webhook import query_webhook as sdk_query_webhook
+        try:
+            result = sdk_query_webhook(agent_id, registry_url)
+            if result.success:
+                print("Registered webhook:")
+                print(f"  Agent ID:    {result.agent_id}")
+                print(f"  Webhook URL: {result.webhook_url}")
+            else:
+                print(f"Error: {result.error}")
+                sys.exit(1)
+        except Exception as e:
+            print(f"Error during webhook query: {e}")
+            sys.exit(1)
 
 def main():
     parser = argparse.ArgumentParser(description="Creduent CLI v2 - Agent identity and capability management.")
@@ -215,8 +331,29 @@ def main():
     
     # Discover
     parser_discover = subparsers.add_parser("discover", help="Discover an agent's capabilities")
-    parser_discover.add_argument("target", help="The target agent URI (e.g., agent://stripe/payments)")
+    parser_discover.add_argument("target", help="The target agent URI (e.g., agent://idevsec/reconbot)")
     parser_discover.add_argument("--as", dest="as_agent", help="Perform authenticated discovery as this agent_id")
+    parser_discover.add_argument("--key", help="Path to Ed25519 private key file")
+    
+    # Renew
+    parser_renew = subparsers.add_parser("renew", help="Renew agent attestation")
+    parser_renew.add_argument("--agent", required=True, help="Agent URI to renew")
+    parser_renew.add_argument("--days", type=int, default=30, help="Attestation validity in days")
+    parser_renew.add_argument("--key", help="Path to Ed25519 private key file")
+
+    # Webhook
+    parser_webhook = subparsers.add_parser("webhook", help="Manage webhooks")
+    webhook_subparsers = parser_webhook.add_subparsers(dest="webhook_command", help="Webhook subcommands")
+
+    # Webhook register
+    parser_webhook_reg = webhook_subparsers.add_parser("register", help="Register a webhook URL")
+    parser_webhook_reg.add_argument("--agent", required=True, help="Agent URI")
+    parser_webhook_reg.add_argument("--url", required=True, help="Webhook URL to receive attestation notifications")
+    parser_webhook_reg.add_argument("--key", help="Path to Ed25519 private key file")
+
+    # Webhook query
+    parser_webhook_query = webhook_subparsers.add_parser("query", help="Query registered webhook URL")
+    parser_webhook_query.add_argument("--agent", required=True, help="Agent URI")
     
     args = parser.parse_args()
     
@@ -228,6 +365,10 @@ def main():
         cmd_build(args)
     elif args.command == "discover":
         cmd_discover(args)
+    elif args.command == "renew":
+        cmd_renew(args)
+    elif args.command == "webhook":
+        cmd_webhook(args)
     else:
         parser.print_help()
 
