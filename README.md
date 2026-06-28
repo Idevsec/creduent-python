@@ -146,5 +146,15 @@ Fetches attestation status for an agent from the registry.
 ## Contributing
 Bugs, feature requests, and pull requests welcome via [GitHub Issues](https://github.com/idevsec/creduent/issues).
 
+## Security & Hardening
+
+The Creduent Python SDK enforces key safety and signature verification practices:
+
+- **Strict Key Storage Permissions:** Key generation commands (`creduent keygen` in the CLI and `creduent-sign generate-keys` in the signing tool) automatically restrict the saved private key file's permissions to `0o600` (read/write by owner only) on Unix-based systems.
+- **Fail-Closed Verification:** Any validation parsing error or timestamp format discrepancy defaults to marking the verification or attestation status as invalid, guarding against format injection attacks.
+
+---
+
 ## License
-Dual Licensed under Apache License 2.0 (Open Source) and Commercial License — see [LICENSE](LICENSE).
+
+Licensed under the **[Apache License 2.0](LICENSE)**. See the [LICENSE](LICENSE) file for the full legal text.

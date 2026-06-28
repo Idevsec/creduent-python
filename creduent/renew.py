@@ -27,7 +27,7 @@ def renew(
     agent_id: str,
     new_expires_at: str,
     private_key_pem: str,
-    registry_url: str = "https://registry.idevsec.com"
+    registry_url: str = "https://creduent.idevsec.com"
 ) -> RenewResult:
     """Renew an agent's attestation validity period.
 
@@ -35,7 +35,7 @@ def renew(
         agent_id (str): The agent's URI.
         new_expires_at (str): The new expiration timestamp in ISO format.
         private_key_pem (str): The agent's private key in PEM format.
-        registry_url (str): The registry URL. Defaults to "https://registry.idevsec.com".
+        registry_url (str): The registry URL. Defaults to "https://creduent.idevsec.com".
 
     Returns:
         RenewResult: The result of the renewal.

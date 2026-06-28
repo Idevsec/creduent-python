@@ -30,7 +30,7 @@ def register_webhook(
     agent_id: str,
     webhook_url: str,
     private_key_pem: str,
-    registry_url: str = "https://registry.idevsec.com"
+    registry_url: str = "https://creduent.idevsec.com"
 ) -> WebhookResult:
     """Register a webhook URL for an agent.
 
@@ -38,7 +38,7 @@ def register_webhook(
         agent_id (str): The agent's URI.
         webhook_url (str): The webhook URL to receive protocol updates.
         private_key_pem (str): The agent's private key in PEM format.
-        registry_url (str): The registry URL. Defaults to "https://registry.idevsec.com".
+        registry_url (str): The registry URL. Defaults to "https://creduent.idevsec.com".
 
     Returns:
         WebhookResult: The result of registration.
@@ -111,13 +111,13 @@ def register_webhook(
 
 def query_webhook(
     agent_id: str,
-    registry_url: str = "https://registry.idevsec.com"
+    registry_url: str = "https://creduent.idevsec.com"
 ) -> WebhookResult:
     """Query the registered webhook URL for an agent.
 
     Args:
         agent_id (str): The agent's URI.
-        registry_url (str): The registry URL. Defaults to "https://registry.idevsec.com".
+        registry_url (str): The registry URL. Defaults to "https://creduent.idevsec.com".
 
     Returns:
         WebhookResult: The result of query.

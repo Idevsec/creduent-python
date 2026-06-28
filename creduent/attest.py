@@ -24,14 +24,14 @@ class AttestResult:
 
 def attest(
     agent_id: str,
-    registry_url: str = "https://registry.idevsec.com"
+    registry_url: str = "https://creduent.idevsec.com"
 ) -> AttestResult:
     """Fetch attestation for an agent from the Creduent registry.
 
     Args:
         agent_id (str): The identifier of the agent to query (e.g., "agent://...").
         registry_url (str): The base URL of the Creduent registry. Defaults to
-            "https://registry.idevsec.com".
+            "https://creduent.idevsec.com".
 
     Returns:
         AttestResult: The attestation result. If the registry data indicates the

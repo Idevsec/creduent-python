@@ -161,6 +161,10 @@ def main() -> None:
             # Save private key PEM locally
             with open("private_key.pem", "w", encoding="utf-8") as f:
                 f.write(private_pem)
+            try:
+                os.chmod("private_key.pem", 0o600)
+            except Exception:
+                pass
             print("[SUCCESS] Private key saved to private_key.pem (KEEP THIS SECRET!)")
             
             print("\n" + "="*50)

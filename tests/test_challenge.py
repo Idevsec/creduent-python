@@ -68,7 +68,7 @@ class TestChallengeResponse(unittest.TestCase):
         proof = challenge.create_proof(
             agent_id=self.agent_id,
             private_key_pem=self.private_pem,
-            registry_url="https://registry.idevsec.com"
+            registry_url="https://creduent.idevsec.com"
         )
         
         self.assertTrue(proof["verified"])
@@ -88,7 +88,7 @@ class TestChallengeResponse(unittest.TestCase):
             is_valid = challenge.verify_proof(
                 proof_token=proof["proof_token"],
                 agent_id=self.agent_id,
-                registry_url="https://registry.idevsec.com"
+                registry_url="https://creduent.idevsec.com"
             )
             self.assertTrue(is_valid)
 
@@ -101,7 +101,7 @@ class TestChallengeResponse(unittest.TestCase):
         proof = challenge.create_proof(
             agent_id=self.agent_id,
             private_key_pem=self.private_pem,
-            registry_url="https://registry.idevsec.com"
+            registry_url="https://creduent.idevsec.com"
         )
         
         # Tamper with the proof token (decode, alter, encode)
@@ -126,7 +126,7 @@ class TestChallengeResponse(unittest.TestCase):
             is_valid = challenge.verify_proof(
                 proof_token=tampered_token,
                 agent_id=self.agent_id,
-                registry_url="https://registry.idevsec.com"
+                registry_url="https://creduent.idevsec.com"
             )
             self.assertFalse(is_valid)
 
@@ -139,7 +139,7 @@ class TestChallengeResponse(unittest.TestCase):
         proof = challenge.create_proof(
             agent_id=self.agent_id,
             private_key_pem=self.private_pem,
-            registry_url="https://registry.idevsec.com"
+            registry_url="https://creduent.idevsec.com"
         )
         
         # Get registry public key to verify
@@ -161,7 +161,7 @@ class TestChallengeResponse(unittest.TestCase):
                 is_valid = challenge.verify_proof(
                     proof_token=proof["proof_token"],
                     agent_id=self.agent_id,
-                    registry_url="https://registry.idevsec.com",
+                    registry_url="https://creduent.idevsec.com",
                     registry_pubkey=registry_pubkey
                 )
                 self.assertTrue(is_valid)
@@ -173,7 +173,7 @@ class TestChallengeResponse(unittest.TestCase):
                     is_valid = challenge.verify_proof(
                         proof_token=proof["proof_token"],
                         agent_id=self.agent_id,
-                        registry_url="https://registry.idevsec.com"
+                        registry_url="https://creduent.idevsec.com"
                     )
                     self.assertTrue(is_valid)
             finally:

@@ -43,7 +43,7 @@ def resolve_target(target: str) -> str:
                "https://example.com/.well-known/agent.json").
             2. agent:// URI: A protocol URI pointing to a specific agent path
                (e.g., "agent://creduent/reconbot" or "agent://domain/path").
-            3. Domain or hostname: A standard domain name string (e.g., "registry.idevsec.com").
+            3. Domain or hostname: A standard domain name string (e.g., "creduent.idevsec.com").
 
     Returns:
         str: The resolved HTTPS/HTTP URL pointing to the agent's
@@ -72,11 +72,11 @@ def resolve_target(target: str) -> str:
         
         # Default mapping fallback for testing/reconbot
         if target == "agent://creduent/reconbot":
-            return "https://registry.idevsec.com/.well-known/agent.json"
+            return "https://creduent.idevsec.com/.well-known/agent.json"
             
         # Try to resolve domain from Creduent registry
         try:
-            registry_url = "https://registry.idevsec.com/registry/attest/" + target
+            registry_url = "https://creduent.idevsec.com/registry/attest/" + target
             response = safe_requests_get(registry_url, timeout=5)
             if response.status_code == 200:
                 attestation = response.json()
@@ -89,7 +89,7 @@ def resolve_target(target: str) -> str:
         # Fallback to default namespace resolution
         return f"https://api.{namespace}.ai/.well-known/agent.json"
         
-    # 3. Handle domain or host name (e.g. "registry.idevsec.com")
+    # 3. Handle domain or host name (e.g. "creduent.idevsec.com")
     scheme = "http" if "localhost" in target or "127.0.0.1" in target else "https"
     return f"{scheme}://{target}/.well-known/agent.json"
 

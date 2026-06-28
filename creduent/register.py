@@ -23,7 +23,7 @@ def register(
     agent_id: str,
     domain: str,
     agent_json_url: str,
-    registry_url: str = "https://registry.idevsec.com"
+    registry_url: str = "https://creduent.idevsec.com"
 ) -> RegisterResult:
     """Register agent with Creduent registry.
 
@@ -32,7 +32,7 @@ def register(
         domain (str): The domain name associated with the agent.
         agent_json_url (str): The URL pointing to the agent's well-known agent.json file.
         registry_url (str): The URL of the Creduent registry endpoint. Defaults to
-            "https://registry.idevsec.com".
+            "https://creduent.idevsec.com".
 
     Returns:
         RegisterResult: The result of the registration, containing success status,

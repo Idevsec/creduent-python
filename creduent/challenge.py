@@ -16,7 +16,7 @@ from creduent.attest import attest
 def create_proof(
     agent_id: str,
     private_key_pem: str,
-    registry_url: str = "https://registry.idevsec.com"
+    registry_url: str = "https://creduent.idevsec.com"
 ) -> dict:
     """Creates a signed challenge proof for the agent.
 
@@ -131,7 +131,7 @@ def create_proof(
 def verify_proof(
     proof_token: str,
     agent_id: str,
-    registry_url: str = "https://registry.idevsec.com",
+    registry_url: str = "https://creduent.idevsec.com",
     registry_pubkey: Optional[str] = None
 ) -> bool:
     """Verifies a signed challenge proof token.

@@ -50,6 +50,10 @@ def cmd_keygen(args):
     
     with open(priv_path, "w") as f:
         f.write(priv_pem)
+    try:
+        os.chmod(priv_path, 0o600)
+    except Exception:
+        pass
         
     with open(pub_path, "w") as f:
         f.write(pub_str)
@@ -214,7 +218,7 @@ def cmd_renew(args):
     agent_id = args.agent
     days = args.days
     
-    registry_url = os.environ.get("CREDUENT_REGISTRY_URL", "https://registry.idevsec.com")
+    registry_url = os.environ.get("CREDUENT_REGISTRY_URL", "https://creduent.idevsec.com")
     
     priv_pem = None
     if args.key and os.path.exists(args.key):
@@ -260,7 +264,7 @@ def cmd_webhook(args):
     """Manages webhooks (register or query)."""
     subcommand = args.webhook_command
     agent_id = args.agent
-    registry_url = os.environ.get("CREDUENT_REGISTRY_URL", "https://registry.idevsec.com")
+    registry_url = os.environ.get("CREDUENT_REGISTRY_URL", "https://creduent.idevsec.com")
 
     if subcommand == "register":
         url = args.url
