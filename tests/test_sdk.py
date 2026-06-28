@@ -246,7 +246,7 @@ class TestCreduentSDK(unittest.TestCase):
             valid=True,
             agent_id="agent://idevsec/reconbot",
             public_key="ed25519:test",
-            endpoint="https://api.idevsec.com",
+            endpoint="https://creduent.idevsec.com",
             capabilities=["get_status"],
             error=None
         )
@@ -254,7 +254,7 @@ class TestCreduentSDK(unittest.TestCase):
         res = discover("agent://idevsec/reconbot")
         
         self.assertEqual(res.target_agent_id, "agent://idevsec/reconbot")
-        self.assertEqual(res.endpoint, "https://api.idevsec.com")
+        self.assertEqual(res.endpoint, "https://creduent.idevsec.com")
         self.assertFalse(res.authenticated)
         self.assertListEqual(res.capabilities, ["get_status"])
 
@@ -268,7 +268,7 @@ class TestCreduentSDK(unittest.TestCase):
             valid=True,
             agent_id="agent://idevsec/reconbot",
             public_key="ed25519:test",
-            endpoint="https://api.idevsec.com",
+            endpoint="https://creduent.idevsec.com",
             capabilities=["get_status"],
             error=None
         )
@@ -283,7 +283,7 @@ class TestCreduentSDK(unittest.TestCase):
                 
         mock_post.return_value = MockResponse({
             "capabilities": [
-                {"name": "process_refund", "schema": "https://api.idevsec.com/openapi.json"}
+                {"name": "process_refund", "schema": "https://creduent.idevsec.com/openapi.json"}
             ]
         }, 200)
         
