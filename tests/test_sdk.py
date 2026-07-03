@@ -23,6 +23,7 @@ from creduent import (
 import creduent.attest
 import creduent.verify
 import creduent.discovery
+
 attest_module = sys.modules["creduent.attest"]
 verify_module = sys.modules["creduent.verify"]
 discovery_module = sys.modules["creduent.discovery"]
