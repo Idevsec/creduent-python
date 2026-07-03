@@ -3,7 +3,14 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [2.0.3] - 2026-07-04
+
+### Fixed
+- **CI Test Suite Isolation:** Wrapped FastAPI and local registry imports in `try-except` blocks inside `tests/test_challenge.py`, allowing integration tests to be skipped cleanly in remote VM environments where sibling workspaces (`creduent-vercel`) do not exist.
+
+### Added
+- **Community Standards & Styling:** Integrated `CODE_OF_CONDUCT.md`, `SECURITY.md`, `CONTRIBUTING.md`, `.editorconfig`, and `.pre-commit-config.yaml` utilizing Ruff hooks.
+- **CI Workflows:** Set up automated Ruff styling checks and publication actions.
 
 ## [2.0.2] - 2026-06-27
 
