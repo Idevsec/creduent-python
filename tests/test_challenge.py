@@ -2,6 +2,7 @@ import os
 import sys
 import unittest
 from unittest.mock import patch
+
 # Add workspace paths to import SDK and Registry
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../creduent-vercel"))
@@ -14,12 +15,15 @@ try:
     from fastapi.testclient import TestClient
     from registry.main import app  # type: ignore
     from registry.store import save_attestation, save_challenge  # type: ignore
+
     HAS_INTEGRATION_DEPS = True
 except ImportError:
     HAS_INTEGRATION_DEPS = False
 
 
-@unittest.skipUnless(HAS_INTEGRATION_DEPS, "FastAPI or creduent-vercel registry not available")
+@unittest.skipUnless(
+    HAS_INTEGRATION_DEPS, "FastAPI or creduent-vercel registry not available"
+)
 class TestChallengeResponse(unittest.TestCase):
     def setUp(self):
         # Generate dynamic registry key for test environment
