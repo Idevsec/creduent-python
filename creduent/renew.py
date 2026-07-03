@@ -10,6 +10,7 @@ from cryptography.hazmat.primitives import serialization
 from creduent.crypto import canonicalize
 from creduent.exceptions import CreduentError
 
+
 @dataclass
 class RenewResult:
     """The result of renewing an agent's attestation.
@@ -19,15 +20,17 @@ class RenewResult:
         attestation (Optional[dict]): The renewed attestation record, or None if failed.
         error (Optional[str]): An error description if renewal failed, else None.
     """
+
     success: bool
     attestation: Optional[dict]
     error: Optional[str] = None
+
 
 def renew(
     agent_id: str,
     new_expires_at: str,
     private_key_pem: str,
-    registry_url: str = "https://creduent.idevsec.com"
+    registry_url: str = "https://creduent.idevsec.com",
 ) -> RenewResult:
     """Renew an agent's attestation validity period.
 
@@ -42,29 +45,25 @@ def renew(
     """
     try:
         private_key = serialization.load_pem_private_key(
-            private_key_pem.encode('utf-8'),
-            password=None
+            private_key_pem.encode("utf-8"), password=None
         )
         if not isinstance(private_key, ed25519.Ed25519PrivateKey):
             raise ValueError("Key is not an Ed25519 private key")
     except Exception as e:
         raise CreduentError(f"Failed parsing private key PEM: {e}")
 
-    payload = {
-        "agent_id": agent_id,
-        "new_expires_at": new_expires_at
-    }
+    payload = {"agent_id": agent_id, "new_expires_at": new_expires_at}
 
     try:
         canonical_str = canonicalize(payload)
-        canonical_bytes = canonical_str.encode('utf-8')
+        canonical_bytes = canonical_str.encode("utf-8")
         signature_bytes = private_key.sign(canonical_bytes)
-        signature = base64.b64encode(signature_bytes).decode('utf-8')
+        signature = base64.b64encode(signature_bytes).decode("utf-8")
     except Exception as e:
         raise CreduentError(f"Failed to sign renewal payload: {e}")
 
-    base_url = registry_url.rstrip('/')
-    if base_url.endswith('/registry'):
+    base_url = registry_url.rstrip("/")
+    if base_url.endswith("/registry"):
         endpoint = f"{base_url}/renew"
     else:
         endpoint = f"{base_url}/registry/renew"
@@ -72,7 +71,7 @@ def renew(
     req_payload = {
         "agent_id": agent_id,
         "new_expires_at": new_expires_at,
-        "signature": signature
+        "signature": signature,
     }
 
     try:
@@ -80,7 +79,7 @@ def renew(
             endpoint,
             json=req_payload,
             headers={"Content-Type": "application/json"},
-            timeout=10
+            timeout=10,
         )
     except requests.RequestException as e:
         raise CreduentError(f"Connection to Creduent registry failed: {e}")
@@ -99,4 +98,8 @@ def renew(
                 err_detail = err_json["detail"]
         except Exception:
             pass
-        return RenewResult(success=False, attestation=None, error=f"Renewal failed with HTTP {response.status_code}: {err_detail}")
+        return RenewResult(
+            success=False,
+            attestation=None,
+            error=f"Renewal failed with HTTP {response.status_code}: {err_detail}",
+        )

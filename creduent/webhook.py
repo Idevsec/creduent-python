@@ -11,6 +11,7 @@ from cryptography.hazmat.primitives import serialization
 from creduent.crypto import canonicalize
 from creduent.exceptions import CreduentError
 
+
 @dataclass
 class WebhookResult:
     """The result of a webhook operation.
@@ -21,16 +22,18 @@ class WebhookResult:
         webhook_url (Optional[str]): The registered webhook URL.
         error (Optional[str]): Error description if operation failed.
     """
+
     success: bool
     agent_id: Optional[str] = None
     webhook_url: Optional[str] = None
     error: Optional[str] = None
 
+
 def register_webhook(
     agent_id: str,
     webhook_url: str,
     private_key_pem: str,
-    registry_url: str = "https://creduent.idevsec.com"
+    registry_url: str = "https://creduent.idevsec.com",
 ) -> WebhookResult:
     """Register a webhook URL for an agent.
 
@@ -45,29 +48,25 @@ def register_webhook(
     """
     try:
         private_key = serialization.load_pem_private_key(
-            private_key_pem.encode('utf-8'),
-            password=None
+            private_key_pem.encode("utf-8"), password=None
         )
         if not isinstance(private_key, ed25519.Ed25519PrivateKey):
             raise ValueError("Key is not an Ed25519 private key")
     except Exception as e:
         raise CreduentError(f"Failed parsing private key PEM: {e}")
 
-    payload = {
-        "agent_id": agent_id,
-        "webhook_url": webhook_url
-    }
+    payload = {"agent_id": agent_id, "webhook_url": webhook_url}
 
     try:
         canonical_str = canonicalize(payload)
-        canonical_bytes = canonical_str.encode('utf-8')
+        canonical_bytes = canonical_str.encode("utf-8")
         signature_bytes = private_key.sign(canonical_bytes)
-        signature = base64.b64encode(signature_bytes).decode('utf-8')
+        signature = base64.b64encode(signature_bytes).decode("utf-8")
     except Exception as e:
         raise CreduentError(f"Failed to sign webhook payload: {e}")
 
-    base_url = registry_url.rstrip('/')
-    if base_url.endswith('/registry'):
+    base_url = registry_url.rstrip("/")
+    if base_url.endswith("/registry"):
         endpoint = f"{base_url}/webhook/register"
     else:
         endpoint = f"{base_url}/registry/webhook/register"
@@ -75,7 +74,7 @@ def register_webhook(
     req_payload = {
         "agent_id": agent_id,
         "webhook_url": webhook_url,
-        "signature": signature
+        "signature": signature,
     }
 
     try:
@@ -83,7 +82,7 @@ def register_webhook(
             endpoint,
             json=req_payload,
             headers={"Content-Type": "application/json"},
-            timeout=10
+            timeout=10,
         )
     except requests.RequestException as e:
         raise CreduentError(f"Connection to Creduent registry failed: {e}")
@@ -95,7 +94,7 @@ def register_webhook(
                 success=True,
                 agent_id=data.get("agent_id", agent_id),
                 webhook_url=data.get("webhook_url", webhook_url),
-                error=None
+                error=None,
             )
         except Exception as e:
             raise CreduentError(f"Registry returned invalid JSON: {e}")
@@ -107,11 +106,14 @@ def register_webhook(
                 err_detail = err_json["detail"]
         except Exception:
             pass
-        return WebhookResult(success=False, error=f"Webhook registration failed with HTTP {response.status_code}: {err_detail}")
+        return WebhookResult(
+            success=False,
+            error=f"Webhook registration failed with HTTP {response.status_code}: {err_detail}",
+        )
+
 
 def query_webhook(
-    agent_id: str,
-    registry_url: str = "https://creduent.idevsec.com"
+    agent_id: str, registry_url: str = "https://creduent.idevsec.com"
 ) -> WebhookResult:
     """Query the registered webhook URL for an agent.
 
@@ -122,18 +124,16 @@ def query_webhook(
     Returns:
         WebhookResult: The result of query.
     """
-    base_url = registry_url.rstrip('/')
-    encoded_agent_id = urllib.parse.quote(agent_id, safe='')
-    if base_url.endswith('/registry'):
+    base_url = registry_url.rstrip("/")
+    encoded_agent_id = urllib.parse.quote(agent_id, safe="")
+    if base_url.endswith("/registry"):
         endpoint = f"{base_url}/webhook/{encoded_agent_id}"
     else:
         endpoint = f"{base_url}/registry/webhook/{encoded_agent_id}"
 
     try:
         response = requests.get(
-            endpoint,
-            headers={"Content-Type": "application/json"},
-            timeout=10
+            endpoint, headers={"Content-Type": "application/json"}, timeout=10
         )
     except requests.RequestException as e:
         raise CreduentError(f"Connection to Creduent registry failed: {e}")
@@ -145,7 +145,7 @@ def query_webhook(
                 success=True,
                 agent_id=data.get("agent_id", agent_id),
                 webhook_url=data.get("webhook_url"),
-                error=None
+                error=None,
             )
         except Exception as e:
             raise CreduentError(f"Registry returned invalid JSON: {e}")
@@ -157,4 +157,7 @@ def query_webhook(
                 err_detail = err_json["detail"]
         except Exception:
             pass
-        return WebhookResult(success=False, error=f"Webhook query failed with HTTP {response.status_code}: {err_detail}")
+        return WebhookResult(
+            success=False,
+            error=f"Webhook query failed with HTTP {response.status_code}: {err_detail}",
+        )

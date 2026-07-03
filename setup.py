@@ -24,5 +24,5 @@ setup(
             "creduent-sign=creduent.sign:main",
             "creduent-verify=creduent.verify:main",
         ]
-    }
+    },
 )

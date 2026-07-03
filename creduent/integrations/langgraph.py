@@ -6,12 +6,13 @@ from creduent.exceptions import VerificationError
 
 logger = logging.getLogger(__name__)
 
+
 def verify_agent_node(state: Dict[str, Any], strict: bool = True) -> Dict[str, Any]:
     """
     A LangGraph node function that verifies a Creduent agent URI.
     It expects the state dictionary to contain an 'agent_uri' key.
     It returns an updated state with 'verification_result'.
-    
+
     In strict mode (default), it raises a VerificationError on failure.
     """
     agent_uri = state.get("agent_uri")
@@ -19,7 +20,7 @@ def verify_agent_node(state: Dict[str, Any], strict: bool = True) -> Dict[str, A
         if strict:
             raise VerificationError("No 'agent_uri' found in state.")
         return {"verification_result": {"verified": False, "error": "No URI provided"}}
-        
+
     logger.info(f"LangGraph node verifying agent: {agent_uri}")
     try:
         result = verify(agent_uri)
@@ -29,9 +30,9 @@ def verify_agent_node(state: Dict[str, Any], strict: bool = True) -> Dict[str, A
             "public_key": result.public_key,
             "endpoint": result.endpoint,
             "capabilities": result.capabilities,
-            "error": result.error
+            "error": result.error,
         }
-        
+
         if result.valid:
             return {"verification_result": result_dict}
         else:

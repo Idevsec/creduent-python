@@ -14,7 +14,7 @@ from creduent.exceptions import (
     CreduEntError,
     VerificationError,
     RegistrationError,
-    AttestationError
+    AttestationError,
 )
 from creduent import challenge
 
@@ -40,6 +40,5 @@ __all__ = [
     "VerificationError",
     "RegistrationError",
     "AttestationError",
-    "challenge"
+    "challenge",
 ]
-

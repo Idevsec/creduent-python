@@ -5,6 +5,7 @@ from typing import Optional
 
 from creduent.exceptions import RegistrationError
 
+
 @dataclass
 class RegisterResult:
     """The result of registering an agent with the Creduent registry.
@@ -15,15 +16,17 @@ class RegisterResult:
             or None if registration failed.
         error (Optional[str]): An error description if registration failed, else None.
     """
+
     success: bool  # True if registration succeeded, False otherwise.
     attestation: Optional[dict]  # Dictionary of attestation details.
     error: Optional[str] = None  # Error message description if success is False.
+
 
 def register(
     agent_id: str,
     domain: str,
     agent_json_url: str,
-    registry_url: str = "https://creduent.idevsec.com"
+    registry_url: str = "https://creduent.idevsec.com",
 ) -> RegisterResult:
     """Register agent with Creduent registry.
 
@@ -42,43 +45,41 @@ def register(
         RegistrationError: If the connection fails, registry returns invalid JSON,
             or a validation error occurs.
     """
-    base_url = registry_url.rstrip('/')
+    base_url = registry_url.rstrip("/")
     # If URL already ends with /registry, the endpoint is /register.
     # Otherwise, it's /registry/register.
-    if base_url.endswith('/registry'):
+    if base_url.endswith("/registry"):
         endpoint = f"{base_url}/register"
     else:
         endpoint = f"{base_url}/registry/register"
-        
-    payload = {
-        "agent_id": agent_id,
-        "domain": domain,
-        "agent_json_url": agent_json_url
-    }
-    
+
+    payload = {"agent_id": agent_id, "domain": domain, "agent_json_url": agent_json_url}
+
     try:
         response = requests.post(
             endpoint,
             json=payload,
             headers={"Content-Type": "application/json"},
-            timeout=10
+            timeout=10,
         )
     except requests.RequestException as e:
         # If the preferred endpoint failed, try fallback /register directly
-        if not base_url.endswith('/registry'):
+        if not base_url.endswith("/registry"):
             fallback_endpoint = f"{base_url}/register"
             try:
                 response = requests.post(
                     fallback_endpoint,
                     json=payload,
                     headers={"Content-Type": "application/json"},
-                    timeout=10
+                    timeout=10,
                 )
             except requests.RequestException as inner_e:
-                raise RegistrationError(f"Connection to Creduent registry failed: {inner_e}")
+                raise RegistrationError(
+                    f"Connection to Creduent registry failed: {inner_e}"
+                )
         else:
             raise RegistrationError(f"Connection to Creduent registry failed: {e}")
-            
+
     if response.status_code == 200:
         try:
             attestation = response.json()
@@ -94,5 +95,7 @@ def register(
                 err_detail = err_json["detail"]
         except Exception:
             pass
-            
-        raise RegistrationError(f"Registration failed with HTTP {response.status_code}: {err_detail}")
+
+        raise RegistrationError(
+            f"Registration failed with HTTP {response.status_code}: {err_detail}"
+        )

@@ -4,12 +4,20 @@ from typing import Any, Dict
 try:
     from crewai.tools import BaseTool
     from pydantic import BaseModel, Field
+
     HAS_CREWAI = True
 except ImportError:
     HAS_CREWAI = False
-    class BaseTool: pass
-    class BaseModel: pass
-    def Field(*args, **kwargs): return None
+
+    class BaseTool:
+        pass
+
+    class BaseModel:
+        pass
+
+    def Field(*args, **kwargs):
+        return None
+
 
 from creduent.verify import verify
 from creduent.exceptions import VerificationError
@@ -17,8 +25,12 @@ from creduent.exceptions import VerificationError
 logger = logging.getLogger(__name__)
 
 if HAS_CREWAI:
+
     class CreduentVerifyInput(BaseModel):
-        agent_uri: str = Field(..., description="The Creduent URI of the agent to verify, e.g. agent://namespace/name")
+        agent_uri: str = Field(
+            ...,
+            description="The Creduent URI of the agent to verify, e.g. agent://namespace/name",
+        )
 
     class CreduentVerifyTool(BaseTool):
         name: str = "Creduent Agent Verification"
@@ -49,6 +61,7 @@ if HAS_CREWAI:
                 return f"Verification FAILED: {error_msg}"
 
 else:
+
     class CreduentVerifyTool:
         def __init__(self, *args, **kwargs):
             raise ImportError(

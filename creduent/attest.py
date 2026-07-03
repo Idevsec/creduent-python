@@ -4,6 +4,7 @@ from typing import Optional
 from creduent.utils import safe_requests_get
 from creduent.exceptions import AttestationError
 
+
 @dataclass
 class AttestResult:
     """The result of an agent attestation query.
@@ -16,15 +17,16 @@ class AttestResult:
         expires_at (Optional[str]): The ISO-8601 timestamp when the attestation expires.
         error (Optional[str]): An error description if attestation failed or expired.
     """
+
     attested: bool
     level: Optional[str]
     issued_at: Optional[str]
     expires_at: Optional[str]
     error: Optional[str] = None
 
+
 def attest(
-    agent_id: str,
-    registry_url: str = "https://creduent.idevsec.com"
+    agent_id: str, registry_url: str = "https://creduent.idevsec.com"
 ) -> AttestResult:
     """Fetch attestation for an agent from the Creduent registry.
 
@@ -43,31 +45,33 @@ def attest(
         AttestationError: If the connection to the registry fails, the registry
             returns invalid JSON, or a non-404 HTTP error occurs.
     """
-    base_url = registry_url.rstrip('/')
-    
+    base_url = registry_url.rstrip("/")
+
     # URL escape agent_id if needed, but since it's a path parameter:
     # FastAPI path parameter matches `/attest/{agent_id:path}`
     # E.g. /registry/attest/agent://creduent/reconbot
     # Note: double slashes in agent:// might get collapsed by some proxies or routers.
     # The registry endpoint router handles path normalization.
-    if base_url.endswith('/registry'):
+    if base_url.endswith("/registry"):
         endpoint = f"{base_url}/attest/{agent_id}"
     else:
         endpoint = f"{base_url}/registry/attest/{agent_id}"
-        
+
     try:
         response = safe_requests_get(endpoint, timeout=10)
     except Exception as e:
         # Fallback without /registry if default failed
-        if not base_url.endswith('/registry'):
+        if not base_url.endswith("/registry"):
             fallback_endpoint = f"{base_url}/attest/{agent_id}"
             try:
                 response = safe_requests_get(fallback_endpoint, timeout=10)
             except Exception as inner_e:
-                raise AttestationError(f"Connection to Creduent registry failed: {inner_e}")
+                raise AttestationError(
+                    f"Connection to Creduent registry failed: {inner_e}"
+                )
         else:
             raise AttestationError(f"Connection to Creduent registry failed: {e}")
-            
+
     if response.status_code == 200:
         try:
             data = response.json()
@@ -77,14 +81,14 @@ def attest(
                     level=data.get("level"),
                     issued_at=data.get("issued_at"),
                     expires_at=data.get("expires_at"),
-                    error="Attestation has expired. Please renew."
+                    error="Attestation has expired. Please renew.",
                 )
             return AttestResult(
                 attested=True,
                 level=data.get("level", "verified"),
                 issued_at=data.get("issued_at"),
                 expires_at=data.get("expires_at"),
-                error=None
+                error=None,
             )
         except Exception as e:
             raise AttestationError(f"Registry returned invalid JSON: {e}")
@@ -96,7 +100,7 @@ def attest(
             level=None,
             issued_at=None,
             expires_at=None,
-            error="Attestation not found or expired"
+            error="Attestation not found or expired",
         )
     elif response.status_code == 410:
         # Agent is revoked
@@ -105,7 +109,7 @@ def attest(
             level="revoked",
             issued_at=None,
             expires_at=None,
-            error="Attestation revoked for agent."
+            error="Attestation revoked for agent.",
         )
     else:
         # Server or validation error
@@ -116,5 +120,7 @@ def attest(
                 err_detail = err_json["detail"]
         except Exception:
             pass
-            
-        raise AttestationError(f"Attestation query failed with HTTP {response.status_code}: {err_detail}")
+
+        raise AttestationError(
+            f"Attestation query failed with HTTP {response.status_code}: {err_detail}"
+        )
