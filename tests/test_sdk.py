@@ -20,6 +20,12 @@ from creduent import (
     VerificationError,
     AttestationError,
 )
+import creduent.attest
+import creduent.verify
+import creduent.discovery
+attest_module = sys.modules["creduent.attest"]
+verify_module = sys.modules["creduent.verify"]
+discovery_module = sys.modules["creduent.discovery"]
 
 
 class TestCreduentSDK(unittest.TestCase):
@@ -121,7 +127,7 @@ class TestCreduentSDK(unittest.TestCase):
                 f"\n[WARNING] Live attestation test skipped/failed due to network: {e}"
             )
 
-    @patch("creduent.attest.safe_requests_get")
+    @patch.object(attest_module, "safe_requests_get")
     def test_attest_revoked_410(self, mock_get):
         """5b. attest() handles HTTP 410 (revoked) status cleanly"""
 
@@ -238,7 +244,7 @@ class TestCreduentSDK(unittest.TestCase):
         self.assertFalse(res.valid)
         self.assertIn("Active key is expired", res.error)
 
-    @patch("creduent.verify.safe_requests_get")
+    @patch.object(verify_module, "safe_requests_get")
     def test_verify_cross_namespace_spoofing(self, mock_get):
         """9. verify() rejects document if the claimed agent_id does not match the requested target"""
         priv1, pub1 = generate_keys()
@@ -271,7 +277,7 @@ class TestCreduentSDK(unittest.TestCase):
         self.assertFalse(res.valid)
         self.assertIn("Cross-Namespace Spoofing Detected", res.error)
 
-    @patch("creduent.discovery.verify")
+    @patch.object(discovery_module, "verify")
     def test_discover_public_capabilities(self, mock_verify):
         """10. discover() returns public capabilities without authentication"""
         from creduent.verify import VerifyResult
@@ -292,7 +298,7 @@ class TestCreduentSDK(unittest.TestCase):
         self.assertFalse(res.authenticated)
         self.assertListEqual(res.capabilities, ["get_status"])
 
-    @patch("creduent.discovery.verify")
+    @patch.object(discovery_module, "verify")
     @patch("requests.post")
     def test_discover_authenticated_capabilities(self, mock_post, mock_verify):
         """11. discover() with auth fetches and merges private capabilities"""
