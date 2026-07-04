@@ -39,7 +39,7 @@ def discover(
     retrieve private, high-privilege capabilities.
 
     Args:
-        target_agent_id (str): The URI of the target agent (e.g. "agent://idevsec/reconbot").
+        target_agent_id (str): The URI of the target agent (e.g. "agent://idevsec/steward").
         my_agent_id (str, optional): The discovering agent's URI.
         my_private_key (bytes, optional): The discovering agent's private key PEM.
 

@@ -44,7 +44,7 @@ def resolve_target(target: str) -> str:
                well-known path (e.g., "https://example.com" or
                "https://example.com/.well-known/agent.json").
             2. agent:// URI: A protocol URI pointing to a specific agent path
-               (e.g., "agent://creduent/reconbot" or "agent://domain/path").
+               (e.g., "agent://idevsec/steward" or "agent://domain/path").
             3. Domain or hostname: A standard domain name string (e.g., "creduent.idevsec.com").
 
     Returns:
@@ -84,7 +84,7 @@ def resolve_target(target: str) -> str:
         namespace = parsed.netloc
 
         # Default mapping fallback for testing/reconbot
-        if target == "agent://creduent/reconbot":
+        if target == "agent://idevsec/steward":
             return "https://creduent.idevsec.com/.well-known/agent.json"
 
         # Try to resolve domain from Creduent registry
@@ -421,7 +421,7 @@ GitHub: https://github.com/idevsec/creduent\033[0m
   $ \033[1mcreduent-verify yourdomain.com\033[0m
 
   \033[90m# Verify by agent:// URI\033[0m
-  $ \033[1mcreduent-verify agent://creduent/reconbot\033[0m
+  $ \033[1mcreduent-verify agent://idevsec/steward\033[0m
   """)
 
 

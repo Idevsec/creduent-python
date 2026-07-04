@@ -51,7 +51,7 @@ class TestCreduentSDK(unittest.TestCase):
         private_key_pem, public_key_str = generate_keys()
 
         draft = {
-            "agent_id": "agent://creduent/reconbot",
+            "agent_id": "agent://idevsec/steward",
             "owner": "Creduent",
             "public_key": public_key_str,
             "endpoint": "https://creduent.idevsec.com/recon",
@@ -76,7 +76,7 @@ class TestCreduentSDK(unittest.TestCase):
             result = verify(target)
             self.assertTrue(result.valid)
             self.assertIsNone(result.error)
-            self.assertEqual(result.agent_id, "agent://creduent/reconbot")
+            self.assertEqual(result.agent_id, "agent://idevsec/steward")
         except VerificationError as e:
             # If the network or live endpoint is completely unreachable, skip or print warning
             print(
@@ -88,7 +88,7 @@ class TestCreduentSDK(unittest.TestCase):
         private_key_pem, public_key_str = generate_keys()
 
         draft = {
-            "agent_id": "agent://creduent/reconbot",
+            "agent_id": "agent://idevsec/steward",
             "owner": "Creduent",
             "public_key": public_key_str,
             "endpoint": "https://creduent.idevsec.com/recon",
@@ -112,7 +112,7 @@ class TestCreduentSDK(unittest.TestCase):
     def test_attest_live(self):
         """5. attest() against https://creduent.idevsec.com returns a valid AttestResult"""
         try:
-            result = attest("agent://creduent/reconbot", "https://creduent.idevsec.com")
+            result = attest("agent://idevsec/steward", "https://creduent.idevsec.com")
             # The agent might or might not be currently registered in the database,
             # but the result should be a valid AttestResult dataclass
             self.assertIn(result.attested, [True, False])
@@ -273,7 +273,7 @@ class TestCreduentSDK(unittest.TestCase):
         mock_get.return_value = MockResponse(signed_doc, 200)
 
         # Requesting a idevsec agent, but the registry/server returns the attacker doc
-        res = verify("agent://idevsec/reconbot")
+        res = verify("agent://idevsec/steward")
 
         self.assertFalse(res.valid)
         self.assertIn("Cross-Namespace Spoofing Detected", res.error)
@@ -285,16 +285,16 @@ class TestCreduentSDK(unittest.TestCase):
 
         mock_verify.return_value = VerifyResult(
             valid=True,
-            agent_id="agent://idevsec/reconbot",
+            agent_id="agent://idevsec/steward",
             public_key="ed25519:test",
             endpoint="https://creduent.idevsec.com",
             capabilities=["get_status"],
             error=None,
         )
 
-        res = discover("agent://idevsec/reconbot")
+        res = discover("agent://idevsec/steward")
 
-        self.assertEqual(res.target_agent_id, "agent://idevsec/reconbot")
+        self.assertEqual(res.target_agent_id, "agent://idevsec/steward")
         self.assertEqual(res.endpoint, "https://creduent.idevsec.com")
         self.assertFalse(res.authenticated)
         self.assertListEqual(res.capabilities, ["get_status"])
@@ -307,7 +307,7 @@ class TestCreduentSDK(unittest.TestCase):
 
         mock_verify.return_value = VerifyResult(
             valid=True,
-            agent_id="agent://idevsec/reconbot",
+            agent_id="agent://idevsec/steward",
             public_key="ed25519:test",
             endpoint="https://creduent.idevsec.com",
             capabilities=["get_status"],
@@ -337,9 +337,9 @@ class TestCreduentSDK(unittest.TestCase):
 
         priv1, _ = generate_keys()
 
-        res = discover("agent://idevsec/reconbot", "agent://my/bot", priv1)
+        res = discover("agent://idevsec/steward", "agent://my/bot", priv1)
 
-        self.assertEqual(res.target_agent_id, "agent://idevsec/reconbot")
+        self.assertEqual(res.target_agent_id, "agent://idevsec/steward")
         self.assertTrue(res.authenticated)
         # Should merge the public "get_status" and the private dict
         self.assertEqual(len(res.capabilities), 2)

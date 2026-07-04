@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+
+## [2.0.4] - 2026-07-05
+
+### Changed
+
+- **Documentation & Examples:** Updated the canonical example agent identity in all documentation and docstrings. Replaced the `reconbot` test agent with `agent://idevsec/steward` to align with the authoritative registry.
+- **Test Suite Updates:** Refactored unit and integration tests to validate against the authoritative `steward` agent URI instead of legacy testing stubs.
+
 ## [2.0.3] - 2026-07-04
 
 ### Fixed

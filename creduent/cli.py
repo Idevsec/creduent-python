@@ -364,7 +364,7 @@ def main():
         "discover", help="Discover an agent's capabilities"
     )
     parser_discover.add_argument(
-        "target", help="The target agent URI (e.g., agent://idevsec/reconbot)"
+        "target", help="The target agent URI (e.g., agent://idevsec/steward)"
     )
     parser_discover.add_argument(
         "--as", dest="as_agent", help="Perform authenticated discovery as this agent_id"

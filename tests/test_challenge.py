@@ -40,7 +40,7 @@ class TestChallengeResponse(unittest.TestCase):
         os.environ["CREDUENT_REGISTRY_KEY"] = reg_private_pem
 
         self.client = TestClient(app)
-        self.agent_id = "agent://idevsec/reconbot"
+        self.agent_id = "agent://idevsec/steward"
         self.private_pem, self.public_key_str = generate_keys()
 
         # Mock register the agent in registry db (save attestation)

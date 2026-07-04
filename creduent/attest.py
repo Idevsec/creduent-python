@@ -49,7 +49,7 @@ def attest(
 
     # URL escape agent_id if needed, but since it's a path parameter:
     # FastAPI path parameter matches `/attest/{agent_id:path}`
-    # E.g. /registry/attest/agent://creduent/reconbot
+    # E.g. /registry/attest/agent://idevsec/steward
     # Note: double slashes in agent:// might get collapsed by some proxies or routers.
     # The registry endpoint router handles path normalization.
     if base_url.endswith("/registry"):
