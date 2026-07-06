@@ -203,12 +203,27 @@ def cmd_discover(args):
                         with open(local_pem_path, "r") as f:
                             priv_pem = f.read()
                     else:
+                        if getattr(args, "json", False):
+                            print(json.dumps({"success": False, "error": "No private key found."}))
+                            sys.exit(1)
                         print(
                             "Error: --as requires a private key in --key, .creduent/keys/, ./private_key.pem or CREDUENT_PRIVATE_KEY env var."
                         )
                         sys.exit(1)
 
     result = discover(target, my_agent_id, priv_pem)
+
+    if getattr(args, "json", False):
+        out = {
+            "target_agent_id": result.target_agent_id,
+            "endpoint": result.endpoint,
+            "authenticated": result.authenticated,
+            "capabilities": result.capabilities,
+        }
+        if result.error:
+            out["error"] = result.error
+        print(json.dumps(out))
+        return
 
     print(f"Target Agent: {result.target_agent_id}")
     print(f"Endpoint: {result.endpoint}")
@@ -252,6 +267,9 @@ def cmd_renew(args):
                         priv_pem = f.read()
 
     if not priv_pem:
+        if getattr(args, "json", False):
+            print(json.dumps({"success": False, "error": "No private key found."}))
+            sys.exit(1)
         print(
             "Error: No private key found. Use --key, set CREDUENT_PRIVATE_KEY, or place private_key.pem in the current folder."
         )
@@ -267,12 +285,21 @@ def cmd_renew(args):
     try:
         result = sdk_renew(agent_id, new_expires_at, priv_pem, registry_url)
         if result.success:
+            if getattr(args, "json", False):
+                print(json.dumps({"success": True, "attestation": result.attestation}))
+                return
             print("Successfully renewed agent attestation:")
             print(json.dumps(result.attestation, indent=2))
         else:
+            if getattr(args, "json", False):
+                print(json.dumps({"success": False, "error": result.error}))
+                sys.exit(1)
             print(f"Error: {result.error}")
             sys.exit(1)
     except Exception as e:
+        if getattr(args, "json", False):
+            print(json.dumps({"success": False, "error": str(e)}))
+            sys.exit(1)
         print(f"Error during renewal: {e}")
         sys.exit(1)
 
@@ -307,6 +334,9 @@ def cmd_webhook(args):
                             priv_pem = f.read()
 
         if not priv_pem:
+            if getattr(args, "json", False):
+                print(json.dumps({"success": False, "error": "No private key found."}))
+                sys.exit(1)
             print(
                 "Error: No private key found. Use --key, set CREDUENT_PRIVATE_KEY, or place private_key.pem in the current folder."
             )
@@ -317,13 +347,26 @@ def cmd_webhook(args):
         try:
             result = sdk_register_webhook(agent_id, url, priv_pem, registry_url)
             if result.success:
+                if getattr(args, "json", False):
+                    print(json.dumps({
+                        "success": True,
+                        "agent_id": result.agent_id,
+                        "webhook_url": result.webhook_url
+                    }))
+                    return
                 print("Successfully registered webhook URL:")
                 print(f"  Agent ID:    {result.agent_id}")
                 print(f"  Webhook URL: {result.webhook_url}")
             else:
+                if getattr(args, "json", False):
+                    print(json.dumps({"success": False, "error": result.error}))
+                    sys.exit(1)
                 print(f"Error: {result.error}")
                 sys.exit(1)
         except Exception as e:
+            if getattr(args, "json", False):
+                print(json.dumps({"success": False, "error": str(e)}))
+                sys.exit(1)
             print(f"Error during webhook registration: {e}")
             sys.exit(1)
 
@@ -333,13 +376,26 @@ def cmd_webhook(args):
         try:
             result = sdk_query_webhook(agent_id, registry_url)
             if result.success:
+                if getattr(args, "json", False):
+                    print(json.dumps({
+                        "success": True,
+                        "agent_id": result.agent_id,
+                        "webhook_url": result.webhook_url
+                    }))
+                    return
                 print("Registered webhook:")
                 print(f"  Agent ID:    {result.agent_id}")
                 print(f"  Webhook URL: {result.webhook_url}")
             else:
+                if getattr(args, "json", False):
+                    print(json.dumps({"success": False, "error": result.error}))
+                    sys.exit(1)
                 print(f"Error: {result.error}")
                 sys.exit(1)
         except Exception as e:
+            if getattr(args, "json", False):
+                print(json.dumps({"success": False, "error": str(e)}))
+                sys.exit(1)
             print(f"Error during webhook query: {e}")
             sys.exit(1)
 
@@ -351,13 +407,16 @@ def main():
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # Init
-    subparsers.add_parser("init", help="Scaffold a new agent.yaml")
+    parser_init = subparsers.add_parser("init", help="Scaffold a new agent.yaml")
+    parser_init.add_argument("--json", action="store_true", help="Output in JSON format")
 
     # Keygen
-    subparsers.add_parser("keygen", help="Generate Ed25519 keys locally")
+    parser_keygen = subparsers.add_parser("keygen", help="Generate Ed25519 keys locally")
+    parser_keygen.add_argument("--json", action="store_true", help="Output in JSON format")
 
     # Build
-    subparsers.add_parser("build", help="Compile agent.yaml to a signed agent.json")
+    parser_build = subparsers.add_parser("build", help="Compile agent.yaml to a signed agent.json")
+    parser_build.add_argument("--json", action="store_true", help="Output in JSON format")
 
     # Discover
     parser_discover = subparsers.add_parser(
@@ -370,6 +429,7 @@ def main():
         "--as", dest="as_agent", help="Perform authenticated discovery as this agent_id"
     )
     parser_discover.add_argument("--key", help="Path to Ed25519 private key file")
+    parser_discover.add_argument("--json", action="store_true", help="Output in JSON format")
 
     # Renew
     parser_renew = subparsers.add_parser("renew", help="Renew agent attestation")
@@ -378,6 +438,7 @@ def main():
         "--days", type=int, default=30, help="Attestation validity in days"
     )
     parser_renew.add_argument("--key", help="Path to Ed25519 private key file")
+    parser_renew.add_argument("--json", action="store_true", help="Output in JSON format")
 
     # Webhook
     parser_webhook = subparsers.add_parser("webhook", help="Manage webhooks")
@@ -394,12 +455,14 @@ def main():
         "--url", required=True, help="Webhook URL to receive attestation notifications"
     )
     parser_webhook_reg.add_argument("--key", help="Path to Ed25519 private key file")
+    parser_webhook_reg.add_argument("--json", action="store_true", help="Output in JSON format")
 
     # Webhook query
     parser_webhook_query = webhook_subparsers.add_parser(
         "query", help="Query registered webhook URL"
     )
     parser_webhook_query.add_argument("--agent", required=True, help="Agent URI")
+    parser_webhook_query.add_argument("--json", action="store_true", help="Output in JSON format")
 
     args = parser.parse_args()
 
