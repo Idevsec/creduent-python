@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="creduent",
-    version="2.0.5",
+    version="2.0.6",
     author="IDevSec",
     url="https://github.com/idevsec/creduent-python",
     description="Creduent is the open application-layer protocol for cryptographic identity and trust verification of autonomous AI agents using Ed25519 and DNS.",

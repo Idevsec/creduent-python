@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
-## [2.0.5] - 2026-07-09
+## [2.0.6] - 2026-07-09
 
 ### Changed
 - **Authorship Alignment**: Updated SDK readme to reflect that the Creduent Protocol was originally created by Kashish Kanojia and is stewarded by IDevSec.
