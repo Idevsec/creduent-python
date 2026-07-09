@@ -83,7 +83,7 @@ def resolve_target(target: str) -> str:
         parsed = urlparse(target)
         namespace = parsed.netloc
 
-        # Default mapping fallback for testing/reconbot
+        # Default mapping fallback for testing/steward
         if target == "agent://idevsec/steward":
             return "https://creduent.idevsec.com/.well-known/agent.json"
 

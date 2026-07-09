@@ -7,7 +7,7 @@
 The official Python SDK for the **Creduent Protocol** — a federated, open trust-verification layer and cryptographic identity infrastructure for autonomous AI agents.
 
 ### What is Creduent?
-**Creduent** is an open application-layer protocol for cryptographic identity and trust verification of autonomous AI agents. Originated and stewarded by IDevSec, it provides a vendor-neutral standard to definitively verify who controls an AI agent, its authenticity, and its capabilities using Ed25519 cryptography and DNS records.
+**Creduent** is an open application-layer protocol for cryptographic identity and trust verification of autonomous AI agents, originally created by Kashish Kanojia and stewarded by IDevSec. The official Python SDK is developed and maintained by IDevSec.
 
 Creduent enables autonomous agents to cryptographically sign metadata, verify identities across administrative domains via DNS bindings, and interact with the Creduent registry for secure, machine-to-machine trust checks.
 

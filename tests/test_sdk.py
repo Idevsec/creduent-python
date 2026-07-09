@@ -55,7 +55,7 @@ class TestCreduentSDK(unittest.TestCase):
             "owner": "Creduent",
             "public_key": public_key_str,
             "endpoint": "https://creduent.idevsec.com/recon",
-            "capabilities": ["osint", "dns_lookup", "vulnerability_scan"],
+            "capabilities": ["query", "resolve", "verify"],
         }
 
         signed_doc = sign(draft, private_key_pem)
@@ -92,7 +92,7 @@ class TestCreduentSDK(unittest.TestCase):
             "owner": "Creduent",
             "public_key": public_key_str,
             "endpoint": "https://creduent.idevsec.com/recon",
-            "capabilities": ["osint", "dns_lookup", "vulnerability_scan"],
+            "capabilities": ["query", "resolve", "verify"],
         }
 
         signed_doc = sign(draft, private_key_pem)

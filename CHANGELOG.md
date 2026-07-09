@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [2.0.5] - 2026-07-09
+
+### Changed
+- **Authorship Alignment**: Updated SDK readme to reflect that the Creduent Protocol was originally created by Kashish Kanojia and is stewarded by IDevSec.
+- **Resolver Fallbacks**: Swapped legacy `reconbot` test agent references with the authoritative `steward` agent URI.
+- **Capabilities Standardization**: Updated test suite capability tags to standard strings (`"query"`, `"resolve"`, `"verify"`) to align with v2.0 schema validator.
+
 ## [2.0.4] - 2026-07-05
 
 ### Changed
