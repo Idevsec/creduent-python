@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [2.0.7] - 2026-07-10
+
+### Changed
+- **Copywriting cleanup**: Replaced `utilize` with `use` in `CONTRIBUTING.md` to comply with the project's plain-language writing guidelines.
+
 ## [2.0.6] - 2026-07-09
 
 ### Changed

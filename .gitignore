@@ -7,7 +7,9 @@ build/
 .eggs/
 .env
 .env.local
+.env*
 *.pem
+private_key.pem
 .pytest_cache/
 .venv/
 venv/
@@ -18,4 +20,3 @@ creduent/__pycache__/
 # Claude / Agent rules
 CLAUDE.md
 AGENTS.md
-

@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/github/license/idevsec/creduent.svg)](https://github.com/idevsec/creduent/blob/main/LICENSE)
 [![Python Compatibility](https://img.shields.io/pypi/pyversions/creduent.svg)](https://pypi.org/project/creduent/)
 
-The official Python SDK for the **Creduent Protocol** — a federated, open trust-verification layer and cryptographic identity infrastructure for autonomous AI agents.
+The official Python SDK for the **Creduent Protocol**, a federated, open trust-verification layer and cryptographic identity infrastructure for autonomous AI agents.
 
 ### What is Creduent?
 **Creduent** is an open application-layer protocol for cryptographic identity and trust verification of autonomous AI agents, originally created by Kashish Kanojia and stewarded by IDevSec. The official Python SDK is developed and maintained by IDevSec.
@@ -132,14 +132,14 @@ Signs a draft agent document using JCS canonicalization (RFC 8785) + Ed25519. Re
 
 ### `verify(target: str | dict) -> VerifyResult`
 Verifies a self-signed agent.json. Accepts dict, HTTPS URL, domain, local path, or `agent://` URI.
-- `result.valid` — bool
+- `result.valid`: bool
 - `result.agent_id`, `result.keys`, `result.endpoint`, `result.capabilities`
-- `result.error` — str or None
+- `result.error`: str or None
 
 ### `register(agent_id, domain, agent_json_url, registry_url?) -> RegisterResult`
 Registers an agent with the Creduent registry.
-- `result.success` — bool
-- `result.attestation` — dict (level, issued_at, expires_at, ...)
+- `result.success`: bool
+- `result.attestation`: dict (level, issued_at, expires_at, ...)
 
 ### `attest(agent_id, registry_url?) -> AttestResult`
 Fetches attestation status for an agent from the registry.

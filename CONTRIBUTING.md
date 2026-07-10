@@ -39,7 +39,7 @@ Thank you for your interest in contributing to the Creduent Python SDK! This gui
 ## Code Guidelines & Robustness Guarantees
 
 Please ensure all contributions respect the security and design criteria of the Creduent Protocol:
-* **Cryptographic Integrity:** Local signature verification must utilize standard cryptographic wrappers (like `cryptography` primitives) and reject signature mismatches with explicit errors.
+* **Cryptographic Integrity:** Local signature verification must use standard cryptographic wrappers (like `cryptography` primitives) and reject signature mismatches with explicit errors.
 * **Canonicalization:** Payloads must be formatted exactly using RFC 8785 JSON Canonicalization Scheme (JCS) before generating or verifying signatures.
 * **Typing & Documentation:** Adhere to PEP 8 standards and ensure all new features include proper type hints and docstrings.
 
