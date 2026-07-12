@@ -2,6 +2,20 @@
 
 Thank you for your interest in contributing to the Creduent Python SDK! This guide helps you set up your local development environment and outlines our contribution guidelines.
 
+Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before participating. By contributing, you agree to abide by its terms.
+
+---
+
+## Contributor Licensing (DCO)
+
+By submitting a Pull Request, you certify that your contribution is made under the terms of the [Developer Certificate of Origin](https://developercertificate.org). Add a sign-off to every commit:
+
+```bash
+git commit -s -m "your commit message"
+```
+
+This adds a `Signed-off-by: Your Name <your@email.com>` line to your commit. Pull Requests without a sign-off on every commit will not be merged.
+
 ---
 
 ## Development Setup
@@ -64,3 +78,21 @@ To keep the repository clean and manageable, please follow our branching convent
 4. Open a Pull Request (PR) against the `main` branch.
 5. Fill out the Pull Request template completely.
 6. Ensure any checks (CI workflows) pass and request review from maintainers.
+
+---
+
+## Commit Message Conventions
+
+We follow the Conventional Commits specification. Commit messages must be structured as follows:
+
+```text
+<type>(<scope>): <description>
+
+[optional body]
+```
+
+Allowed types include:
+- `feat`: A new protocol feature or SDK capability.
+- `fix`: A bug fix in the reference implementation or schema.
+- `docs`: Documentation updates.
+- `refactor`: Code changes that do not alter behavior.
