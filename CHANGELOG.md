@@ -4,13 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [2.0.9] - 2026-07-12
+
+### Changed
+- **Community Standards:** Added a direct link to `CODE_OF_CONDUCT.md` at the top of `CONTRIBUTING.md` so contributors are directed to it before participating.
+
 ## [2.0.8] - 2026-07-12
 
 ### Changed
 - **Contributing Guidelines:** Added Developer Certificate of Origin (DCO) sign-off requirement and Conventional Commits message conventions to `CONTRIBUTING.md`.
-- **Community Standards:** Added a direct link to `CODE_OF_CONDUCT.md` at the top of `CONTRIBUTING.md` so contributors are directed to it before participating.
 
 ## [2.0.7] - 2026-07-10
+
 
 ### Changed
 - **Copywriting cleanup**: Replaced `utilize` with `use` in `CONTRIBUTING.md` to comply with the project's plain-language writing guidelines.
