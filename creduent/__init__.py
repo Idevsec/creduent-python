@@ -8,7 +8,7 @@ from creduent.register import register, RegisterResult
 from creduent.attest import attest, AttestResult
 from creduent.discovery import discover, DiscoveryResult, DiscoveryError
 from creduent.renew import renew, RenewResult
-from creduent.webhook import register_webhook, query_webhook, WebhookResult
+from creduent.webhook import register_webhook, query_webhook, WebhookResult, verify_webhook_signature
 from creduent.exceptions import (
     CreduentError,
     CreduEntError,
@@ -35,6 +35,7 @@ __all__ = [
     "register_webhook",
     "query_webhook",
     "WebhookResult",
+    "verify_webhook_signature",
     "CreduentError",
     "CreduEntError",
     "VerificationError",

@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [2.0.10] - 2026-07-21
+
+### Added
+- **HMAC Webhook Verification**: Added `verify_webhook_signature(secret, signature_hex, timestamp, payload)` function to `creduent/webhook.py` (exported from the package root). Uses `hmac.compare_digest` for timing-safe signature matching.
+- **Contributing Guidelines**: Added Project Roadmap & Wanted Features hotspots section to `CONTRIBUTING.md`.
+
 ## [2.0.9] - 2026-07-12
 
 ### Changed

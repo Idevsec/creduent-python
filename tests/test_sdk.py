@@ -17,6 +17,7 @@ from creduent import (
     renew,
     register_webhook,
     query_webhook,
+    verify_webhook_signature,
     VerificationError,
     AttestationError,
 )
@@ -484,6 +485,44 @@ class TestCreduentSDK(unittest.TestCase):
         self.assertEqual(res.webhook_url, "https://example.com/hook")
         mock_get.assert_called_once()
 
+    def test_verify_webhook_signature(self):
+        """16. verify_webhook_signature() verifies valid signatures and rejects invalid/tampered ones"""
+        import hmac
+        import hashlib
+        from creduent.crypto import canonicalize
+
+        secret = "whsec_test_secret_key_123456"
+        timestamp = "1784594000"
+        payload = {
+            "event": "agent.expiry_warning",
+            "agent_id": "agent://test/agent",
+            "days_remaining": 28,
+        }
+
+        canonical = canonicalize(payload)
+        sig_data = f"{timestamp}.{canonical}"
+        
+        expected_sig = hmac.new(
+            secret.encode("utf-8"),
+            sig_data.encode("utf-8"),
+            hashlib.sha256
+        ).hexdigest()
+
+        # 1. Valid signature
+        self.assertTrue(verify_webhook_signature(secret, expected_sig, timestamp, payload))
+
+        # 2. Invalid signature
+        self.assertFalse(verify_webhook_signature(secret, "bad_sig_hex", timestamp, payload))
+
+        # 3. Tampered payload
+        tampered_payload = payload.copy()
+        tampered_payload["days_remaining"] = 27
+        self.assertFalse(verify_webhook_signature(secret, expected_sig, timestamp, tampered_payload))
+
+        # 4. Tampered timestamp
+        self.assertFalse(verify_webhook_signature(secret, expected_sig, "1784594001", payload))
+
 
 if __name__ == "__main__":
     unittest.main()
+

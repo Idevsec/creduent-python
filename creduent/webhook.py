@@ -161,3 +161,34 @@ def query_webhook(
             success=False,
             error=f"Webhook query failed with HTTP {response.status_code}: {err_detail}",
         )
+
+
+def verify_webhook_signature(
+    secret: str, signature_hex: str, timestamp: str, payload: dict
+) -> bool:
+    """Verify the HMAC-SHA256 signature of a webhook payload.
+
+    Args:
+        secret (str): The pre-shared webhook secret key.
+        signature_hex (str): The signature value from X-Creduent-Signature256 header.
+        timestamp (str): The timestamp from X-Creduent-Timestamp header.
+        payload (dict): The parsed JSON payload dictionary.
+
+    Returns:
+        bool: True if signature is valid, False otherwise.
+    """
+    import hmac
+    import hashlib
+    try:
+        canonical_str = canonicalize(payload)
+        signed_data = f"{timestamp}.{canonical_str}"
+        
+        computed_sig = hmac.new(
+            secret.encode("utf-8"),
+            signed_data.encode("utf-8"),
+            hashlib.sha256
+        ).hexdigest()
+        
+        return hmac.compare_digest(computed_sig, signature_hex)
+    except Exception:
+        return False
