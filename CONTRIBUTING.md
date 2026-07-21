@@ -96,3 +96,20 @@ Allowed types include:
 - `fix`: A bug fix in the reference implementation or schema.
 - `docs`: Documentation updates.
 - `refactor`: Code changes that do not alter behavior.
+
+---
+
+## Project Roadmap & Wanted Features
+
+The Creduent Python SDK follows the global [Creduent Protocol Roadmap](https://github.com/idevsec/creduent/blob/main/ROADMAP.md). If you are looking for specific ways to contribute to the Python SDK ecosystem, please refer to our active hotspots below:
+
+### Python SDK Active Hotspots
+* **Framework Integrations (Phase 4):** Help expand framework adapters for:
+  * **LlamaIndex Python** (custom tools and validation wrappers).
+  * **Google ADK** (Agent Development Kit verification node).
+  * **Semantic Kernel** (Python verification middleware).
+* **Verifier Caching (Phase 4):** Implement thread-safe local caching wrappers for agent attestation lookups to protect registry origin endpoints under load.
+* **Delegation (CREDUENT-007 / Phase 5):** Assist in implementing reference signing logic for delegation tokens (`sign_delegation()`) and recursive chain validation logic.
+
+Before opening a Pull Request for a new feature, please open an Issue to align on the specification and design.
+
