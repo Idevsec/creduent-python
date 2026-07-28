@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="creduent",
-    version="2.0.10",
+    version="2.1.0",
     author="IDevSec",
     url="https://github.com/idevsec/creduent-python",
     description="Creduent is the open application-layer protocol for cryptographic identity and trust verification of autonomous AI agents using Ed25519 and DNS.",
@@ -25,7 +25,9 @@ setup(
         "crewai": ["crewai"],
         "langgraph": ["langgraph"],
         "autogen": ["autogen"],
-        "all": ["crewai", "langgraph", "autogen"],
+        "langchain": ["langchain-core"],
+        "llamaindex": ["llama-index-core"],
+        "all": ["crewai", "langgraph", "autogen", "langchain-core", "llama-index-core"],
     },
     entry_points={
         "console_scripts": [

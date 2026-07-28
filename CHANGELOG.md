@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [2.1.0] - 2026-07-31
+
+### Added
+- **Native Framework Integrations**: Added native Creduent zero-trust identity verification adapters for **LangChain** (`creduent.integrations.langchain`), **LlamaIndex** (`creduent.integrations.llamaindex`), **Microsoft Semantic Kernel** (`creduent.integrations.semantic_kernel`), and **Google Agent Development Kit (ADK)** (`creduent.integrations.google_adk`).
+- **Complete Framework Coverage**: Achieved 100% native verification coverage across CrewAI, LangGraph, AutoGen, LangChain, LlamaIndex, Semantic Kernel, and Google ADK.
+
 ## [2.0.10] - 2026-07-21
 
 ### Added

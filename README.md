@@ -20,7 +20,7 @@ Creduent enables autonomous agents to cryptographically sign metadata, verify id
 - **DNS Trust Binding**: Verify cryptographic bindings between `agent://` identifiers and web domains.
 - **Registry Integration**: Register agents and resolve signed attestations from the Creduent Registry.
 - **Discovery API**: Directly fetch and parse an agent's `agent.json` from their well-known endpoint without needing the registry.
-- **Framework Integrations**: Native middleware/tools for **CrewAI**, **LangGraph**, and **AutoGen**.
+- **Framework Integrations**: Native middleware/tools for **CrewAI**, **LangGraph**, **AutoGen**, **LangChain**, **LlamaIndex**, **Microsoft Semantic Kernel**, and **Google ADK**.
 - **Unified CLI `creduent`**: Out-of-the-box CLI commands for CRD scaffolding, signing, and capability discovery.
 
 ---
@@ -36,6 +36,8 @@ To install with specific framework integration support:
 pip install "creduent[crewai]"
 pip install "creduent[langgraph]"
 pip install "creduent[autogen]"
+pip install "creduent[langchain]"
+pip install "creduent[llamaindex]"
 pip install "creduent[all]"
 ```
 

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "creduent"
-version = "2.0.10"
+version = "2.1.0"
 description = "Creduent is the open application-layer protocol for cryptographic identity and trust verification of autonomous AI agents using Ed25519 and DNS."
 
 authors = [
@@ -55,7 +55,9 @@ dependencies = [
 crewai = ["crewai"]
 langgraph = ["langgraph"]
 autogen = ["autogen"]
-all = ["crewai", "langgraph", "autogen"]
+langchain = ["langchain-core"]
+llamaindex = ["llama-index-core"]
+all = ["crewai", "langgraph", "autogen", "langchain-core", "llama-index-core"]
 
 [project.urls]
 Homepage = "https://idevsec.com/creduent"
