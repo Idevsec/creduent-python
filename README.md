@@ -19,6 +19,8 @@ Creduent enables autonomous agents to cryptographically sign metadata, verify id
 - **RFC 8785 Canonical Signatures**: Compute cryptographic signatures over JSON agent documents using JCS and Ed25519.
 - **DNS Trust Binding**: Verify cryptographic bindings between `agent://` identifiers and web domains.
 - **Registry Integration**: Register agents and resolve signed attestations from the Creduent Registry.
+- **Provenance & Reversibility Guard**: Fail-closed `ProvenanceGuard` ensuring un-bound tool self-assertions resolve to `IRREVERSIBLE` (OWASP AISVS v1.0 C9.2.3 canonicalization).
+- **Ledger Chain Verification**: Independent `LedgerChainVerifier` querying `/ledger/chain/{chain_id}` to prevent self-referential payload truncation during reduction.
 - **Discovery API**: Directly fetch and parse an agent's `agent.json` from their well-known endpoint without needing the registry.
 - **Framework Integrations**: Native middleware/tools for **CrewAI**, **LangGraph**, **AutoGen**, **LangChain**, **LlamaIndex**, **Microsoft Semantic Kernel**, and **Google ADK**.
 - **Unified CLI `creduent`**: Out-of-the-box CLI commands for CRD scaffolding, signing, and capability discovery.

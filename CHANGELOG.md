@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [2.1.1-hotfix] - 2026-08-06
+
+### Added
+- **ProvenanceGuard**: Added `creduent.provenance.ProvenanceGuard` enforcing adapter boundary validation. Un-bound tool self-assertions default fail-closed to `IRREVERSIBLE` unless bound by a trusted Creduent policy or registry.
+- **LedgerChainVerifier**: Added `creduent.ledger.LedgerChainVerifier` querying independent Ledger API (`/ledger/chain/{chain_id}`) step counts to prevent self-referential payload truncation during reduction.
+- **AISVS C9.2.3 Vocabulary Normalization**: Added canonicalization mapping for OWASP AISVS v1.0 reversibility classes (`read_only`, `reversible`, `external_reversible`, `irreversible`).
+
 ## [2.1.0] - 2026-07-31
 
 ### Added
