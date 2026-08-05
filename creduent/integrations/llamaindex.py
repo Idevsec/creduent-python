@@ -18,18 +18,36 @@ except ImportError:
 
 from creduent.verify import verify
 from creduent.exceptions import VerificationError
+from creduent.provenance import normalize_reversibility_class
 
 logger = logging.getLogger(__name__)
 
 
-def creduent_verify_agent(agent_uri: str) -> str:
+def creduent_verify_agent(
+    agent_uri: str,
+    tool_metadata: Optional[Dict[str, Any]] = None,
+    provenance_source: Optional[str] = None,
+    is_registry_bound: bool = False,
+) -> str:
     """
     Verifies the cryptographic identity and attestations of an external AI agent using the Creduent protocol.
+    Normalizes tool reversibility class at the adapter entry boundary via ProvenanceGuard.
 
     Args:
         agent_uri: The Creduent URI of the agent, e.g. agent://namespace/name
+        tool_metadata: Optional tool metadata dict for reversibility normalization.
+        provenance_source: Trusted registry/policy source for class provenance validation.
+        is_registry_bound: True if the class is bound via a verified Creduent policy document.
     """
-    logger.info(f"Verifying agent via Creduent LlamaIndex FunctionTool: {agent_uri}")
+    reversibility_class = normalize_reversibility_class(
+        tool_metadata=tool_metadata or {},
+        provenance_source=provenance_source,
+        is_registry_bound=is_registry_bound,
+    )
+    logger.info(
+        f"[CreduentLlamaIndex] Tool reversibility normalized to: {reversibility_class} "
+        f"before verifying agent: {agent_uri}"
+    )
     try:
         result = verify(agent_uri)
         if result.valid:

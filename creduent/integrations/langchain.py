@@ -25,6 +25,7 @@ except ImportError:
 
 from creduent.verify import verify
 from creduent.exceptions import VerificationError
+from creduent.provenance import normalize_reversibility_class
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +76,15 @@ if HAS_LANGCHAIN:
         def on_tool_start(
             self, serialized: Dict[str, Any], input_str: str, **kwargs: Any
         ) -> Any:
-            """Intercept tool execution and verify target agent URIs if present."""
+            """Intercept tool execution, normalize reversibility class at boundary, and verify target agent URIs."""
+            tool_name = serialized.get("name", "unknown_tool")
+            reversibility_class = normalize_reversibility_class(
+                tool_metadata=serialized,
+                provenance_source=kwargs.get("provenance_source"),
+                is_registry_bound=kwargs.get("is_registry_bound", False),
+            )
+            logger.info(f"[CreduentLangChainCallback] Tool '{tool_name}' reversibility normalized to: {reversibility_class}")
+
             for agent_uri in self.target_agent_uris:
                 logger.info(f"[CreduentLangChainCallback] Pre-execution check for: {agent_uri}")
                 result = verify(agent_uri)
@@ -83,6 +92,7 @@ if HAS_LANGCHAIN:
                     raise VerificationError(
                         f"LangChain tool execution blocked. Agent verification failed for {agent_uri}: {result.error}"
                     )
+
 
 else:
 

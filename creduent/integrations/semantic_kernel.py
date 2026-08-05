@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 try:
     from semantic_kernel.functions import kernel_function
@@ -17,6 +17,7 @@ except ImportError:
 
 from creduent.verify import verify
 from creduent.exceptions import VerificationError
+from creduent.provenance import normalize_reversibility_class
 
 logger = logging.getLogger(__name__)
 
@@ -28,9 +29,23 @@ class CreduentSemanticKernelPlugin:
         name="verify_agent",
         description="Verifies the cryptographic identity and attestations of an external AI agent using the Creduent protocol.",
     )
-    def verify_agent(self, agent_uri: str) -> str:
-        """Verify the given agent URI."""
-        logger.info(f"Verifying agent via CreduentSemanticKernelPlugin: {agent_uri}")
+    def verify_agent(
+        self,
+        agent_uri: str,
+        tool_metadata: Optional[Dict[str, Any]] = None,
+        provenance_source: Optional[str] = None,
+        is_registry_bound: bool = False,
+    ) -> str:
+        """Normalizes tool reversibility class at adapter boundary, then verifies the given agent URI."""
+        reversibility_class = normalize_reversibility_class(
+            tool_metadata=tool_metadata or {},
+            provenance_source=provenance_source,
+            is_registry_bound=is_registry_bound,
+        )
+        logger.info(
+            f"[CreduentSK] Tool reversibility normalized to: {reversibility_class} "
+            f"before verifying agent: {agent_uri}"
+        )
         try:
             result = verify(agent_uri)
             if result.valid:

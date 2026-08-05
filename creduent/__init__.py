@@ -18,6 +18,9 @@ from creduent.exceptions import (
 )
 from creduent import challenge
 
+from creduent.provenance import ProvenanceGuard, normalize_reversibility_class, ReversibilityClass
+from creduent.ledger import LedgerChainVerifier, LedgerIntegrityError, LedgerClient
+
 __all__ = [
     "generate_keys",
     "sign",
@@ -42,4 +45,12 @@ __all__ = [
     "RegistrationError",
     "AttestationError",
     "challenge",
+    "ProvenanceGuard",
+    "normalize_reversibility_class",
+    "ReversibilityClass",
+    "LedgerChainVerifier",
+    "LedgerIntegrityError",
+    "LedgerClient",
 ]
+
+

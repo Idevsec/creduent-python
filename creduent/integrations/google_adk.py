@@ -7,11 +7,26 @@ from creduent.exceptions import VerificationError
 logger = logging.getLogger(__name__)
 
 
+from creduent.provenance import normalize_reversibility_class
+
 class CreduentGoogleADKPlugin:
     """Google Agent Development Kit (ADK) execution interceptor for Creduent Zero-Trust Verification."""
 
     def __init__(self, strict: bool = True):
         self.strict = strict
+
+    def normalize_tool_reversibility(
+        self,
+        tool_metadata: Optional[Dict[str, Any]],
+        provenance_source: Optional[str] = None,
+        is_registry_bound: bool = False,
+    ) -> str:
+        """Normalizes tool reversibility class at the Google ADK adapter entry boundary."""
+        return normalize_reversibility_class(
+            tool_metadata=tool_metadata,
+            provenance_source=provenance_source,
+            is_registry_bound=is_registry_bound,
+        )
 
     def verify_agent(self, agent_uri: str) -> Dict[str, Any]:
         """
@@ -44,3 +59,4 @@ class CreduentGoogleADKPlugin:
             elif self.strict:
                 raise
             return {"status": "FAILED", "agent_uri": agent_uri, "verified": False, "error": error_msg}
+
