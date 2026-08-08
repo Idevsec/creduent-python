@@ -10,8 +10,9 @@ from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.exceptions import InvalidSignature
 
 from creduent.crypto import canonicalize
-from creduent.utils import safe_requests_get
+from creduent.utils import safe_requests_get, _global_verification_cache
 from creduent.exceptions import VerificationError
+
 
 
 @dataclass
@@ -107,7 +108,17 @@ def resolve_target(target: str) -> str:
     return f"{scheme}://{target}/.well-known/agent.json"
 
 
-def verify(target: str | dict) -> VerifyResult:
+def clear_verification_cache() -> None:
+    """Flushes all entries from the local verification LRU cache."""
+    _global_verification_cache.clear()
+
+
+def invalidate_agent_cache(agent_id: str) -> None:
+    """Evicts a specific agent's document or attestation entry from the local LRU cache."""
+    _global_verification_cache.delete(agent_id)
+
+
+def verify(target: str | dict, use_cache: bool = True) -> VerifyResult:
     """Verify a self-signed agent.json from a string target or a dictionary.
 
     Args:
@@ -115,6 +126,7 @@ def verify(target: str | dict) -> VerifyResult:
             - str: A domain name, an HTTP/HTTPS URL, an agent:// URI, or a path
               to a local JSON file.
             - dict: A pre-loaded dictionary representation of an agent.json document.
+        use_cache (bool): Whether to check or update local 5-min LRU cache. Default is True.
 
     Returns:
         VerifyResult: The result of the verification, indicating whether the
@@ -127,25 +139,38 @@ def verify(target: str | dict) -> VerifyResult:
     if isinstance(target, dict):
         doc = target
     elif isinstance(target, str):
-        resolved_url = resolve_target(target)
-        try:
-            allow_private = "localhost" in resolved_url or "127.0.0.1" in resolved_url
-            response = safe_requests_get(
-                resolved_url, timeout=5, allow_private=allow_private
-            )
-            if response.status_code != 200:
-                raise VerificationError(
-                    f"Failed to fetch agent.json: HTTP status {response.status_code}"
+        if use_cache:
+            cached_doc = _global_verification_cache.get(target)
+            if cached_doc is not None:
+                doc = cached_doc
+
+        if doc is None:
+            resolved_url = resolve_target(target)
+            try:
+                allow_private = "localhost" in resolved_url or "127.0.0.1" in resolved_url
+                response = safe_requests_get(
+                    resolved_url, timeout=5, allow_private=allow_private
                 )
-            doc = response.json()
-        except Exception as e:
-            # Re-raise VerificationError or wrap other errors
-            if isinstance(e, VerificationError):
-                raise
-            err_msg = str(e)
-            if hasattr(e, "detail"):
-                err_msg = e.detail
-            raise VerificationError(f"Failed to retrieve agent.json: {err_msg}")
+                if response.status_code != 200:
+                    raise VerificationError(
+                        f"Failed to fetch agent.json: HTTP status {response.status_code}"
+                    )
+                doc = response.json()
+                if use_cache and isinstance(doc, dict):
+                    # Check cache-control headers for no-cache
+                    headers = getattr(response, "headers", {}) or {}
+                    cc = headers.get("Cache-Control", "") if hasattr(headers, "get") else ""
+                    if "no-cache" not in cc and "no-store" not in cc:
+                        _global_verification_cache.set(target, doc)
+
+            except Exception as e:
+                # Re-raise VerificationError or wrap other errors
+                if isinstance(e, VerificationError):
+                    raise
+                err_msg = str(e)
+                if hasattr(e, "detail"):
+                    err_msg = e.detail
+                raise VerificationError(f"Failed to retrieve agent.json: {err_msg}")
     else:
         raise VerificationError("Target must be a dictionary or a string")
 

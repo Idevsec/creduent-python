@@ -3,7 +3,7 @@ Creduent Protocol SDK - Cryptographic identity verification for AI agents.
 """
 
 from creduent.sign import generate_keys, sign
-from creduent.verify import verify, VerifyResult
+from creduent.verify import verify, VerifyResult, clear_verification_cache, invalidate_agent_cache
 from creduent.register import register, RegisterResult
 from creduent.attest import attest, AttestResult
 from creduent.discovery import discover, DiscoveryResult, DiscoveryError
@@ -26,6 +26,8 @@ __all__ = [
     "sign",
     "verify",
     "VerifyResult",
+    "clear_verification_cache",
+    "invalidate_agent_cache",
     "register",
     "RegisterResult",
     "attest",
@@ -52,5 +54,6 @@ __all__ = [
     "LedgerIntegrityError",
     "LedgerClient",
 ]
+
 
 

@@ -183,3 +183,47 @@ def load_dotenv():
                                 os.environ[key] = val
             except Exception as e:
                 print(f"[-] Warning: Failed to load environment file {filename}: {e}")
+
+
+import time
+from collections import OrderedDict
+from typing import Any, Optional
+
+
+class AttestationLRUCache:
+    """Thread-safe LRU cache with TTL expiration for resolved agent documents and attestation lookups."""
+
+    def __init__(self, maxsize: int = 500, ttl_seconds: int = 300):
+        self.maxsize = maxsize
+        self.ttl_seconds = ttl_seconds
+        self._cache: OrderedDict[str, tuple[Any, float]] = OrderedDict()
+
+    def get(self, key: str) -> Optional[Any]:
+        if key not in self._cache:
+            return None
+        val, expiry = self._cache[key]
+        if time.time() >= expiry:
+            del self._cache[key]
+            return None
+        self._cache.move_to_end(key)
+        return val
+
+    def set(self, key: str, value: Any, ttl: Optional[int] = None) -> None:
+        eff_ttl = ttl if ttl is not None else self.ttl_seconds
+        expiry = time.time() + eff_ttl
+        if key in self._cache:
+            self._cache.move_to_end(key)
+        self._cache[key] = (value, expiry)
+        if len(self._cache) > self.maxsize:
+            self._cache.popitem(last=False)
+
+    def delete(self, key: str) -> None:
+        self._cache.pop(key, None)
+
+    def clear(self) -> None:
+        self._cache.clear()
+
+
+# Global instance of verification cache
+_global_verification_cache = AttestationLRUCache(maxsize=500, ttl_seconds=300)
+
