@@ -148,6 +148,15 @@ Registers an agent with the Creduent registry.
 ### `attest(agent_id, registry_url?) -> AttestResult`
 Fetches attestation status for an agent from the registry.
 
+### `agent_to_did(agent_uri: str, scheme: str = "creduent") -> str`
+Converts an `agent://` URI into a standard `did:creduent` or `did:web` identifier string.
+
+### `did_to_agent(did_uri: str) -> str`
+Converts a `did:creduent` or `did:web` identifier back to an `agent://` URI.
+
+### `agent_to_did_document(agent_doc: dict, scheme: str = "creduent") -> dict`
+Generates a standard W3C DID Document (JSON-LD compliant) containing `verificationMethod` and `authentication` assertions from an agent identity document.
+
 ---
 
 ## Contributing

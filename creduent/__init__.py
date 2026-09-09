@@ -20,6 +20,7 @@ from creduent import challenge
 
 from creduent.provenance import ProvenanceGuard, normalize_reversibility_class, ReversibilityClass
 from creduent.ledger import LedgerChainVerifier, LedgerIntegrityError, LedgerClient
+from creduent.did import agent_to_did, did_to_agent, agent_to_did_document
 
 __all__ = [
     "generate_keys",
@@ -53,6 +54,9 @@ __all__ = [
     "LedgerChainVerifier",
     "LedgerIntegrityError",
     "LedgerClient",
+    "agent_to_did",
+    "did_to_agent",
+    "agent_to_did_document",
 ]
 
 
