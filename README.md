@@ -23,7 +23,16 @@ Creduent enables autonomous agents to cryptographically sign metadata, verify id
 - **Ledger Chain Verification**: Independent `LedgerChainVerifier` querying `/ledger/chain/{chain_id}` to prevent self-referential payload truncation during reduction.
 - **Discovery API**: Directly fetch and parse an agent's `agent.json` from their well-known endpoint without needing the registry.
 - **Framework Integrations**: Native middleware/tools for **CrewAI**, **LangGraph**, **AutoGen**, **LangChain**, **LlamaIndex**, **Microsoft Semantic Kernel**, and **Google ADK**.
+- **Identity-Based Rate Limiting (IBRL / CREDUENT-008)**: Enforce request throttling per cryptographically verified `agent_id` using `IBRLMiddleware` (FastAPI / Starlette) with Redis sliding window logs and in-memory LRU fallback.
 - **Unified CLI `creduent`**: Out-of-the-box CLI commands for CRD scaffolding, signing, and capability discovery.
+
+---
+
+## Protocol Standards
+
+- **Protocol overview**: [idevsec.com/creduent](https://idevsec.com/creduent)
+- **Technical reference**: [idevsec.com/creduent/docs](https://idevsec.com/creduent/docs)
+- **Standards documents**: [github.com/idevsec/creduent](https://github.com/idevsec/creduent) (CREDUENT-001 through CREDUENT-008)
 
 ---
 
@@ -156,6 +165,16 @@ Converts a `did:creduent` or `did:web` identifier back to an `agent://` URI.
 
 ### `agent_to_did_document(agent_doc: dict, scheme: str = "creduent") -> dict`
 Generates a standard W3C DID Document (JSON-LD compliant) containing `verificationMethod` and `authentication` assertions from an agent identity document.
+
+### `IBRLMiddleware(app, limiter=None)`
+Starlette / FastAPI middleware enforcing Identity-Based Rate Limiting per cryptographically verified `agent_id` or IP address.
+```python
+from fastapi import FastAPI
+from creduent import IBRLMiddleware
+
+app = FastAPI()
+app.add_middleware(IBRLMiddleware)
+```
 
 ---
 

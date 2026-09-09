@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [2.1.2] - 2026-09-10
+
+### Added
+- **Identity-Based Rate Limiting (IBRL / CREDUENT-008)**: Added `IdentityRateLimiter`, Starlette/FastAPI `IBRLMiddleware`, and `@rate_limit_by_agent` decorator supporting Redis sliding window logs and in-memory LRU fallback. Enforces agent-level throttling and emits standard headers (`X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`, `Retry-After`).
+- **DID Interoperability (`did:creduent`)**: Added W3C DID Document conversion and resolution helpers (`to_did_document()`, `from_did_uri()`) mapping `agent://` URIs bidirectionally to `did:creduent` identifiers.
+- **Delegation Token (CDT / CREDUENT-007)**: Added cryptographic delegation primitives `sign_delegation()` and `verify_delegation()` for multi-agent delegation chains, constraint attenuation, and intent binding.
+
 ## [2.1.1-hotfix] - 2026-08-06
 
 ### Added

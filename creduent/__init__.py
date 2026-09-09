@@ -2,6 +2,8 @@
 Creduent Protocol SDK - Cryptographic identity verification for AI agents.
 """
 
+__version__ = "2.1.2"
+
 from creduent.sign import generate_keys, sign
 from creduent.verify import verify, VerifyResult, clear_verification_cache, invalidate_agent_cache
 from creduent.register import register, RegisterResult
@@ -21,6 +23,7 @@ from creduent import challenge
 from creduent.provenance import ProvenanceGuard, normalize_reversibility_class, ReversibilityClass
 from creduent.ledger import LedgerChainVerifier, LedgerIntegrityError, LedgerClient
 from creduent.did import agent_to_did, did_to_agent, agent_to_did_document
+from creduent.ibrl import IdentityRateLimiter, IBRLMiddleware, rate_limit_by_agent, get_global_rate_limiter
 
 __all__ = [
     "generate_keys",
@@ -57,6 +60,10 @@ __all__ = [
     "agent_to_did",
     "did_to_agent",
     "agent_to_did_document",
+    "IdentityRateLimiter",
+    "IBRLMiddleware",
+    "rate_limit_by_agent",
+    "get_global_rate_limiter",
 ]
 
 
