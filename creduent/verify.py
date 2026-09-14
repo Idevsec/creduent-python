@@ -10,7 +10,7 @@ from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.exceptions import InvalidSignature
 
 from creduent.crypto import canonicalize
-from creduent.utils import safe_requests_get, _global_verification_cache
+from creduent.utils import safe_requests_get, _global_verification_cache, verify_dnssec
 from creduent.exceptions import VerificationError
 
 
@@ -33,6 +33,7 @@ class VerifyResult:
     public_key: str  # The public key of the agent in 'ed25519:<base64>' format.
     endpoint: str  # The service endpoint URL of the agent.
     capabilities: List[str]  # The list of capabilities advertised by the agent.
+    dnssec_verified: bool = False  # Whether the target domain has valid DNSSEC RRSIG verification.
     error: Optional[str] = None  # Error message description if valid is False.
 
 
@@ -56,6 +57,10 @@ def resolve_target(target: str) -> str:
         None
     """
     target = target.strip()
+
+    # Traversal & relative path security check
+    if "/../" in target or "\\..\\" in target or target.endswith("/..") or target.endswith("\\..") or "/./" in target or "\\.\\" in target:
+        raise VerificationError("Path traversal or relative path sequence detected in target URI.")
 
     # 1. Handle HTTP/HTTPS URLs
     if target.startswith("http://") or target.startswith("https://"):
@@ -157,11 +162,17 @@ def verify(target: str | dict, use_cache: bool = True) -> VerifyResult:
                     )
                 doc = response.json()
                 if use_cache and isinstance(doc, dict):
-                    # Check cache-control headers for no-cache
+                    # Check cache-control headers for no-cache and max-age
                     headers = getattr(response, "headers", {}) or {}
                     cc = headers.get("Cache-Control", "") if hasattr(headers, "get") else ""
                     if "no-cache" not in cc and "no-store" not in cc:
-                        _global_verification_cache.set(target, doc)
+                        ttl_sec = None
+                        import re
+                        match = re.search(r"max-age=(\d+)", cc, re.IGNORECASE)
+                        if match:
+                            parsed_sec = int(match.group(1))
+                            ttl_sec = max(60, min(86400, parsed_sec))
+                        _global_verification_cache.set(target, doc, ttl=ttl_sec)
 
             except Exception as e:
                 # Re-raise VerificationError or wrap other errors
@@ -281,6 +292,17 @@ def verify(target: str | dict, use_cache: bool = True) -> VerifyResult:
                     error=f"Missing required field '{field}' in agent.json",
                 )
 
+    owner = identity.get("owner", "") if version == "2.0" else doc.get("owner", "")
+    if not isinstance(owner, str) or not (owner.startswith("mailto:") or owner.startswith("https://")):
+        return VerifyResult(
+            valid=False,
+            agent_id=agent_id,
+            public_key="",
+            endpoint=endpoint,
+            capabilities=capabilities,
+            error=f"Invalid owner scheme: '{owner}'. Owner must start with 'mailto:' or 'https://'",
+        )
+
     if isinstance(target, str) and target.startswith("agent://"):
         if agent_id != target:
             return VerifyResult(
@@ -393,12 +415,14 @@ def verify(target: str | dict, use_cache: bool = True) -> VerifyResult:
             public_key.verify(signature_bytes, canonical_bytes)
 
             # If we get here, verification succeeded with this key!
+            dnssec_ok = verify_dnssec(endpoint or agent_id)
             return VerifyResult(
                 valid=True,
                 agent_id=agent_id,
                 public_key=pub_key_str,
                 endpoint=endpoint,
                 capabilities=capabilities,
+                dnssec_verified=dnssec_ok,
                 error=None,
             )
 
@@ -494,6 +518,7 @@ def main() -> None:
             print(f"Public Key:   {result.public_key}")
             print(f"Endpoint:     {result.endpoint}")
             print(f"Capabilities: {', '.join(result.capabilities)}")
+            print(f"DNSSEC:       {'PASSED (RRSIG Verified)' if result.dnssec_verified else 'NOT ENABLED (Advisory)'}")
             print("=" * 50)
             sys.exit(0)
         else:

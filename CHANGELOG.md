@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [2.2.0] - 2026-09-15
+
+### Added
+- **Path Traversal Guard**: Hardened `verify.py` resolution by rejecting target path sequences containing `../` or `..\`, throwing `ValueError` on path traversal attempts.
+- **Owner Scheme Validation**: Added strict validation in `verify.py` enforcing `mailto:` or `https://` schemes for `identity.owner`.
+- **DNSSEC Verification**: Added `verify_dnssec()` DoH lookup helper in `creduent/utils.py` and appended `dnssec_verified` (boolean) to `VerifyResult`.
+- **Dynamic Cache-Control Max-Age**: Enhanced SDK resolution cache to parse HTTP `max-age` directives from CDN response headers and dynamically tune LRU cache TTLs.
+
 ## [2.1.2] - 2026-09-10
 
 ### Added

@@ -38,6 +38,7 @@ class TestChallengeResponse(unittest.TestCase):
         ).decode("utf-8")
 
         os.environ["CREDUENT_REGISTRY_KEY"] = reg_private_pem
+        os.environ["TESTING"] = "True"
 
         self.client = TestClient(app)
         self.agent_id = "agent://idevsec/steward"

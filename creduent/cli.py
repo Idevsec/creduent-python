@@ -19,7 +19,7 @@ def cmd_init(args):
         "kind": "Agent",
         "metadata": {
             "agent_id": "agent://namespace/my_agent",
-            "owner": "My Organization",
+            "owner": "mailto:admin@namespace.com",
             "endpoint": "https://api.namespace.com",
         },
         "spec": {

@@ -26,6 +26,27 @@ def resolve_ips(host: str) -> list[str]:
     return list(set(ips))
 
 
+def verify_dnssec(domain: str) -> bool:
+    """Queries DNS-over-HTTPS (DoH) via Cloudflare to verify if DNSSEC AD flag is True."""
+    if not domain or "localhost" in domain or "127.0.0.1" in domain:
+        return False
+    try:
+        parsed = urlparse(domain if "://" in domain else f"https://{domain}")
+        host = parsed.netloc.split(":")[0] if parsed.netloc else parsed.path.split("/")[0]
+        if not host:
+            return False
+
+        doh_url = f"https://1.1.1.1/dns-query?name={host}&type=A"
+        headers = {"Accept": "application/dns-json"}
+        response = safe_requests_get(doh_url, timeout=3, headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            return bool(data.get("AD", False))
+    except Exception:
+        pass
+    return False
+
+
 def safe_requests_get(
     url: str, timeout: int = 5, allow_private: bool = False, headers: dict = None
 ) -> requests.Response:

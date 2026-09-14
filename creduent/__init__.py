@@ -2,7 +2,7 @@
 Creduent Protocol SDK - Cryptographic identity verification for AI agents.
 """
 
-__version__ = "2.1.2"
+__version__ = "2.2.0"
 
 from creduent.sign import generate_keys, sign
 from creduent.verify import verify, VerifyResult, clear_verification_cache, invalidate_agent_cache

@@ -17,8 +17,10 @@ Creduent enables autonomous agents to cryptographically sign metadata, verify id
 
 - **Cryptographic Identity Management**: Generate secure Ed25519 keypairs for AI agents (multi-key support enabled).
 - **RFC 8785 Canonical Signatures**: Compute cryptographic signatures over JSON agent documents using JCS and Ed25519.
-- **DNS Trust Binding**: Verify cryptographic bindings between `agent://` identifiers and web domains.
-- **Registry Integration**: Register agents and resolve signed attestations from the Creduent Registry.
+- **Path Traversal & Relative Sequence Mitigation**: Reject relative path traversal sequences (`../`, `..\`) in target resolution routines.
+- **Administrative Owner Metadata Validation**: Hardened `owner` field validation in `identity` schema strictly enforcing `mailto:` or `https://` schemes.
+- **Client-Side DNSSEC RRSIG Validation**: DNS-over-HTTPS (DoH) RRSIG verification helper `verify_dnssec()` attaching `dnssec_verified` boolean to `VerifyResult`.
+- **Dynamic Cache-Control Max-Age Tuning**: Parses HTTP `Cache-Control: max-age=N` headers when fetching agent documents to dynamically adjust LRU cache TTLs.
 - **Provenance & Reversibility Guard**: Fail-closed `ProvenanceGuard` ensuring un-bound tool self-assertions resolve to `IRREVERSIBLE` (OWASP AISVS v1.0 C9.2.3 canonicalization).
 - **Ledger Chain Verification**: Independent `LedgerChainVerifier` querying `/ledger/chain/{chain_id}` to prevent self-referential payload truncation during reduction.
 - **Discovery API**: Directly fetch and parse an agent's `agent.json` from their well-known endpoint without needing the registry.

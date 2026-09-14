@@ -53,7 +53,7 @@ class TestCreduentSDK(unittest.TestCase):
 
         draft = {
             "agent_id": "agent://idevsec/steward",
-            "owner": "Creduent",
+            "owner": "mailto:contact@creduent.com",
             "public_key": public_key_str,
             "endpoint": "https://creduent.idevsec.com/recon",
             "capabilities": ["query", "resolve", "verify"],
@@ -90,7 +90,7 @@ class TestCreduentSDK(unittest.TestCase):
 
         draft = {
             "agent_id": "agent://idevsec/steward",
-            "owner": "Creduent",
+            "owner": "mailto:contact@creduent.com",
             "public_key": public_key_str,
             "endpoint": "https://creduent.idevsec.com/recon",
             "capabilities": ["query", "resolve", "verify"],
@@ -162,7 +162,7 @@ class TestCreduentSDK(unittest.TestCase):
         draft = {
             "version": "1.1",
             "agent_id": "agent://creduent/multi",
-            "owner": "Creduent",
+            "owner": "mailto:contact@creduent.com",
             "endpoint": "https://test",
             "capabilities": [],
             "keys": [
@@ -195,7 +195,7 @@ class TestCreduentSDK(unittest.TestCase):
         draft = {
             "version": "1.1",
             "agent_id": "agent://creduent/multi",
-            "owner": "Creduent",
+            "owner": "mailto:contact@creduent.com",
             "endpoint": "https://test",
             "capabilities": [],
             "keys": [
@@ -227,7 +227,7 @@ class TestCreduentSDK(unittest.TestCase):
         draft = {
             "version": "1.1",
             "agent_id": "agent://creduent/multi",
-            "owner": "Creduent",
+            "owner": "mailto:contact@creduent.com",
             "endpoint": "https://test",
             "capabilities": [],
             "keys": [
@@ -255,7 +255,7 @@ class TestCreduentSDK(unittest.TestCase):
         draft = {
             "version": "1.1",
             "agent_id": "agent://attacker/bot",
-            "owner": "Attacker",
+            "owner": "mailto:attacker@attacker.com",
             "endpoint": "https://attacker.com",
             "capabilities": [],
             "public_key": pub1,
@@ -521,6 +521,51 @@ class TestCreduentSDK(unittest.TestCase):
 
         # 4. Tampered timestamp
         self.assertFalse(verify_webhook_signature(secret, expected_sig, "1784594001", payload))
+
+    def test_path_traversal_rejection(self):
+        """17. resolve_target() rejects path traversal attempts"""
+        from creduent.verify import resolve_target
+
+        invalid_targets = [
+            "agent://domain/../../etc/passwd",
+            "https://example.com/../.well-known/agent.json",
+            "agent://namespace/\\..\\secret",
+        ]
+        for t in invalid_targets:
+            with self.assertRaises(VerificationError):
+                resolve_target(t)
+
+    def test_owner_scheme_validation(self):
+        """18. verify() enforces mailto: or https:// owner scheme"""
+        priv1, pub1 = generate_keys()
+
+        # Invalid owner: plain string
+        draft_invalid = {
+            "version": "1.1",
+            "agent_id": "agent://creduent/owner_test",
+            "owner": "Plain Organization",
+            "endpoint": "https://test.com",
+            "capabilities": [],
+            "public_key": pub1,
+        }
+        signed_invalid = sign(draft_invalid, priv1)
+        res_invalid = verify(signed_invalid)
+        self.assertFalse(res_invalid.valid)
+        self.assertIn("Invalid owner scheme", res_invalid.error)
+
+        # Valid owner: mailto:
+        draft_valid_mailto = draft_invalid.copy()
+        draft_valid_mailto["owner"] = "mailto:admin@test.com"
+        signed_mailto = sign(draft_valid_mailto, priv1)
+        res_mailto = verify(signed_mailto)
+        self.assertTrue(res_mailto.valid)
+
+        # Valid owner: https://
+        draft_valid_https = draft_invalid.copy()
+        draft_valid_https["owner"] = "https://test.com/about"
+        signed_https = sign(draft_valid_https, priv1)
+        res_https = verify(signed_https)
+        self.assertTrue(res_https.valid)
 
 
 if __name__ == "__main__":
