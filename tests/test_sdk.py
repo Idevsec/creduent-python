@@ -104,7 +104,7 @@ class TestCreduentSDK(unittest.TestCase):
 
         # 4b. Tamper with a field
         tampered_doc = signed_doc.copy()
-        tampered_doc["owner"] = "Not Creduent"
+        tampered_doc["owner"] = "mailto:hacker@creduent.com"
 
         res_tampered = verify(tampered_doc)
         self.assertFalse(res_tampered.valid)
@@ -541,7 +541,7 @@ class TestCreduentSDK(unittest.TestCase):
 
         # Invalid owner: plain string
         draft_invalid = {
-            "version": "1.1",
+            "version": "2.0",
             "agent_id": "agent://creduent/owner_test",
             "owner": "Plain Organization",
             "endpoint": "https://test.com",

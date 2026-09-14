@@ -292,8 +292,19 @@ def verify(target: str | dict, use_cache: bool = True) -> VerifyResult:
                     error=f"Missing required field '{field}' in agent.json",
                 )
 
-    owner = identity.get("owner", "") if version == "2.0" else doc.get("owner", "")
-    if not isinstance(owner, str) or not (owner.startswith("mailto:") or owner.startswith("https://")):
+    owner = doc.get("owner", "")
+    if isinstance(doc.get("identity"), dict):
+        owner = doc["identity"].get("owner", owner)
+    if not isinstance(owner, str) or not owner:
+        return VerifyResult(
+            valid=False,
+            agent_id=agent_id,
+            public_key="",
+            endpoint=endpoint,
+            capabilities=capabilities,
+            error="Missing or empty owner field in agent.json",
+        )
+    if not (owner.startswith("mailto:") or owner.startswith("https://")):
         return VerifyResult(
             valid=False,
             agent_id=agent_id,
