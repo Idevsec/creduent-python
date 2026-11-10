@@ -26,6 +26,7 @@ Creduent enables autonomous agents to cryptographically sign metadata, verify id
 - **Discovery API**: Directly fetch and parse an agent's `agent.json` from their well-known endpoint without needing the registry.
 - **Framework Integrations**: Native middleware/tools for **CrewAI**, **LangGraph**, **AutoGen**, **LangChain**, **LlamaIndex**, **Microsoft Semantic Kernel**, and **Google ADK**.
 - **Identity-Based Rate Limiting (IBRL / CREDUENT-008)**: Enforce request throttling per cryptographically verified `agent_id` using `IBRLMiddleware` (FastAPI / Starlette) with Redis sliding window logs and in-memory LRU fallback.
+- **Cryptographic Delegation & PoP Verification (CREDUENT-007)**: Issue attenuated Creduent Delegation Tokens (`sign_delegation`), verify multi-hop delegation chains (`verify_delegation_chain`), and bind Proof-of-Possession (`sign_pop_header`, `verify_pop_header`) to stop token replay vulnerabilities.
 - **Unified CLI `creduent`**: Out-of-the-box CLI commands for CRD scaffolding, signing, and capability discovery.
 
 ---
@@ -176,6 +177,43 @@ from creduent import IBRLMiddleware
 
 app = FastAPI()
 app.add_middleware(IBRLMiddleware)
+```
+
+### Delegation & Proof-of-Possession (CREDUENT-007)
+Issue time-bound, capability-attenuated delegation tokens and verify delegation chains:
+```python
+from creduent import sign_delegation, verify_delegation_chain, sign_pop_header
+
+# 1. Parent issues a delegation token (CDT) to a child agent
+cdt = sign_delegation(
+    delegator_private_key=parent_private_pem,
+    delegator_uri="agent://corp/orchestrator",
+    delegate_uri="agent://corp/researcher",
+    delegate_public_key="ed25519:<child_pubkey>",
+    constraints={"allowed_capabilities": ["scan", "query"], "max_reversibility": "reversible"},
+    ttl_seconds=1800,
+)
+
+# 2. Child signs short-lived Proof-of-Possession (PoP) header for a downstream request
+pop_sig, pop_ts = sign_pop_header(
+    delegate_private_key=child_private_pem,
+    http_method="POST",
+    uri_path="/api/v1/search",
+    token_id=cdt["token_id"],
+)
+
+# 3. Gateway verifies delegation chain, constraint narrowing, and PoP key binding
+result = verify_delegation_chain(
+    cdt_chain=[cdt],
+    target_action="search",
+    required_capability="scan",
+    pop_signature=pop_sig,
+    pop_timestamp=pop_ts,
+    http_method="POST",
+    uri_path="/api/v1/search",
+    trusted_public_keys={"agent://corp/orchestrator": "ed25519:<parent_pubkey>"},
+)
+assert result.valid is True
 ```
 
 ---

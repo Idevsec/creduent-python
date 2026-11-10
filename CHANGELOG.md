@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [2.3.0] - 2026-11-10
+
+### Added
+- **Cryptographic Delegation & PoP Verification (CREDUENT-007)**: Added `creduent.delegation` module implementing Creduent Delegation Token (CDT) issuance (`sign_delegation`), recursive multi-hop delegation chain verification (`verify_delegation_chain`), and Proof-of-Possession header signing/verification (`sign_pop_header`, `verify_pop_header`). Enforces capability attenuation, AISVS reversibility level ceilings, clock-skew bounds, and maximum chain depth ($\le 8$).
+
 ## [2.2.1] - 2026-09-15
 
 ### Added
